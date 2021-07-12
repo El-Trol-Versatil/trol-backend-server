@@ -1,6 +1,6 @@
 const PY_SCRIPTS = {
-  SCRIPT1 : 'script_1',
-  SCRIPT2 : 'script_2',
+  TRAIN_BOT : 'trainBot',
+  CREATE_BOT : 'createBot',
 }
 
 module.exports = PY_SCRIPTS;

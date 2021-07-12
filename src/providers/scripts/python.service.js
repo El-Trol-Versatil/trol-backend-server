@@ -10,10 +10,10 @@ let options = {
   args: undefined//['value1', 'value2', 'value3']
 };
 
-exports.executeScript1 = function(callback) {
-  pythonShell.run(PY_SCRIPTS.SCRIPT1, options, callback);
+exports.createBot = function(id, callback) {
+  pythonShell.run(PY_SCRIPTS.TRAIN_BOT, options, callback);
 };
 
-exports.executeScript1 = function(callback) {
-  pythonShell.run(PY_SCRIPTS.SCRIPT2, options, callback);
+exports.trainBot = function(id, callback) {
+  pythonShell.run(PY_SCRIPTS.CREATE_BOT, options, callback);
 };

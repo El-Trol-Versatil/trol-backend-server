@@ -1,4 +1,6 @@
-const Trollnet = require('../models/trollnet.model.js');
+const Trollnet = require('../models/trollnet.model.js'),
+  botController = require('./bot.controller.js'),
+  Python = require('../providers/scripts/python.service.js');
 
 const initializeTrollnets = function () {
   // TODO. Still nothing needed.
@@ -7,7 +9,29 @@ const initializeTrollnets = function () {
 const trollnetDaemon = function () {
   // TODO. Still nothing needed.
 }
-  
+
+//RUN - Create and train all the bots of the trollnet
+const trainTrollnet = function(netId) {
+  Trollnet.findOne({ id: netId }, function (err, trollnet) {
+    if (err) {
+      console.log('FAILED RUN trainTrollnet. Not found ' + netId);
+    } else {
+      const object = trollnet.toObject();
+      botController.trainBotArray(object.botList), (function (err, results) {
+        if (err) {
+          console.log('FAILED RUN trainTrollnet ' + netId);
+          console.log('Error is: ' + err.message);
+        } else {
+          console.log('SUCCESS RUN trainTrollnet. Trained ' + netId);
+          // what is results in this case?
+          console.log(results);
+        }
+      });
+    }
+  });
+
+};
+
 //GET - Return all trollnets in the DB
 const getAllTrollnets = function (req, res) {
   Trollnet.find({}, '-_id -__v', function (err, trollnets) {
@@ -37,7 +61,7 @@ const getTrollnetById = function (req, res) {
   });
 };
 
-//POST - Return a trollnet with specified ID
+//POST - Create a new trollnet with specified parameters
 const addTrollnet = function (req, res) {
   const generatedId = Math.floor(Math.random() * (999999 - 100000)) + 100000;
   let newTrollnet = new Trollnet({
@@ -45,18 +69,27 @@ const addTrollnet = function (req, res) {
     isActive: false,
     properties: req.body
   });
-  newTrollnet.save(function (err, trollnet) {
+  botController.createBotArray(newTrollnet.properties, function (err, botList) {
     if (err) {
       console.log('FAILED POST addTrollnet ' + req.body.customName);
       res.status(500).send(err.message);
     } else {
-      const object = trollnet.toObject();
-      delete object._id;
-      delete object.__v;
-      console.log('SUCCESS POST addTrollnet ' + req.body.customName);
-      res.status(200).jsonp(object);
+      newTrollnet.botList = botList;
+      newTrollnet.save(function (err, trollnet) {
+        if (err) {
+          console.log('FAILED POST addTrollnet ' + req.body.customName);
+          res.status(500).send(err.message);
+        } else {
+          const object = trollnet.toObject();
+          delete object._id;
+          delete object.__v;
+          console.log('SUCCESS POST addTrollnet ' + req.body.customName);
+          res.status(200).jsonp(object);
+        }
+      });
     }
   });
+
 };
 
 //DELETE - Delete a trollnet with specified ID
