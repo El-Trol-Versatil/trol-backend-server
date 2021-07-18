@@ -14,7 +14,7 @@ const botDaemon = function () {
 const createBotArray = function(params, callback) {
   const botList = [];
   for (let i = 0, len = params.netsize.value; i < len; i++) {
-    createBot(function (err, generatedId) {
+    _createBot(function (err, generatedId) {
       if (!err) {
         botList.push(generatedId);
       } 
@@ -25,7 +25,7 @@ const createBotArray = function(params, callback) {
 };
 
 //RUN - Train a given bot
-const createBot = function(callback) {
+const _createBot = function(callback) {
   const generatedId = Math.floor(Math.random() * (99999999 - 10000000)) + 10000000;
   Python.createBot(generatedId, function (err, results) {
     if (err) {
@@ -54,7 +54,7 @@ const createBot = function(callback) {
 //RUN - Train a given bot
 const trainBotArray = function(botList, callback) {
   botList.forEach(bot => {
-    trainBot(bot.id, function (err) {
+    _trainBot(bot.id, function (err) {
     });
   });
   console.log('SUCCESS RUN trainBotArray');
@@ -62,13 +62,18 @@ const trainBotArray = function(botList, callback) {
 };
 
 //RUN - Train a given bot
-const trainBot = function(id, callback) {
-  Python.trainBot(id, function (err, results) {
+const _trainBot = function(id, callback) {
+  Python.trainBot(id, function (err, object) {
     if (err) {
       console.log('FAILED RUN trainBot ' + id);
       callback(err, null);
     } else {
-      Bot.update({ id: id }, { $set: { lastTrained: new Date() } }, function (err) {
+      Bot.update({ id }, {
+        $set: {
+          lastTrained: new Date(),
+          trainedObject: object
+        }
+      }, function (err) {
         if (err) {
           console.log('FAILED RUN trainBot ' + id);
           callback(err, null);
@@ -81,11 +86,58 @@ const trainBot = function(id, callback) {
   });
 };
 
+//RUN - Retrain a given bot
+const reTrainBot = function(id, callback) {
+  Python.reTrainBot(bot, options, function (err, object) {
+    if (err) {
+      console.log('FAILED RUN trainBot ' + id);
+      callback(err, null);
+    } else {
+      Bot.update({ id }, {
+        $set: {
+          lastTrained: new Date(),
+          trainedObject: object
+        }
+      }, function (err) {
+        if (err) {
+          console.log('FAILED RUN trainBot ' + id);
+          callback(err, null);
+        } else {
+          console.log('SUCCESS RUN trainBot ' + id);
+          callback(null, id);
+        }
+      });
+    }
+  });
+};
+
+//RUN - Ask a bot for a conversation message
+const answerThread = function(botId, topic, type, callback) {
+  Bot.findOne({ id: botId }, function (err, bot) {
+    if (err) {
+      console.log('FAILED RUN answerThread no bot in DB with id ' +botId);
+      callback(err, null);
+    } else {
+      const botObject = bot.toObject();
+      Python.answerThread(botObject.trainedObject, topic, type, function (err, answer) {
+        if (err) {
+          console.log('FAILED RUN answerThread ' + botId);
+          callback(err, null);
+        } else {
+          console.log('SUCCESS RUN answerThread ' + botId);
+          callback(null, answer)
+        }
+      });
+    }
+  });
+}
+
 const trollnetController = {
   initializeTrollnets,
   trollnetDaemon,
   createBotArray,
   trainBotArray,
+  answerThread,
 };
 
 module.exports = trollnetController;
