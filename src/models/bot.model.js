@@ -10,7 +10,7 @@ const BotSchema = mongoose.Schema({
                    required: true },
   properties:    { type: mongoose.Schema.Types.Mixed,
                    required: true },
-  trainedObject: { type: mongoose.Schema.Types.Mixed},
+  AIObject:      { type: mongoose.Schema.Types.Mixed},
   lastTrained:   { type: Date },
 });
 

@@ -1,8 +1,8 @@
 const PY_SCRIPTS = {
-  TRAIN_BOT : 'trainBot',
-  RETRAIN_BOT : 'retrainBot',
+  CREATE_BOT : 'createBot',
+  TRAIN_MODEL : 'trainModel',
+  TEACH_BOT : 'teachBot',
   ANSWER_THREAD : 'answerThread',
-  REPLY_THREAD : 'replyThread',
 }
 
 module.exports = PY_SCRIPTS;

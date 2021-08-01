@@ -1,6 +1,12 @@
-const TROLLNETS = {
-  TYPE_ENUM : [
-  ]
+const Training = {
+  UNTRAINED: 'UNTRAINED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  FAILED: 'FAILED',
+  READY: 'READY',
 };
 
-module.exports = TROLLNETS;
+const trollnetConstants = {
+  Training,
+};
+
+module.exports = trollnetConstants;
