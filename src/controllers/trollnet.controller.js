@@ -189,7 +189,7 @@ const _checkUntrainedTrollnets = function() {
 const _launchSetOfTraining = function (untrainedTrollnets) {
   _trainTrollnetsOneByOne(untrainedTrollnets, 0, [], function() {
   // When all nets have been trained, wait a small time to:
-  setTimeout(_launchSetOfTraining, DAEMON_INTERVAL_TIME, [trollnetsWaitingForTraining]);
+  setTimeout(_launchSetOfTraining, DAEMON_INTERVAL_TIME, trollnetsWaitingForTraining);
   });
 };
 
