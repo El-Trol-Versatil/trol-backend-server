@@ -168,11 +168,11 @@ const _launchTrollnetConversation = function(netId) {
       threadController.createConversation(trollnet.topic, trollnet.botList);
     }
   });
-}
+};
 
 const _addUntrainedTrollnet = function(trollnet) {
   trollnetsWaitingForTraining.push(trollnet);
-}
+};
 
 // Check on start if any stored trollnet is untrained, and then check periodically if any is waiting for training.
 const _checkUntrainedTrollnets = function() {
@@ -184,38 +184,38 @@ const _checkUntrainedTrollnets = function() {
     // Launch with a copy of it, so the full algorithm is closed to the list at that moment.
     _launchSetOfTraining(trainingSet);
   });
-
-}
+};
 
 const _launchSetOfTraining = function (untrainedTrollnets) {
   _trainTrollnetsOneByOne(untrainedTrollnets, 0, [], function() {
   // When all nets have been trained, wait a small time to:
   setTimeout(_launchSetOfTraining, DAEMON_INTERVAL_TIME, [trollnetsWaitingForTraining]);
   });
-}
+};
 
 const _trainTrollnetsOneByOne = function(trollnets, index, failedTrainings, finalCallback) {
   if (trollnets.length === 0) {
     finalCallback();
   } else {
-  console.log('...Interval call... _trainTrollnetsOneByOne');
-  const trollnetToTrain = trollnets[index];
-  _teachTrollnet(trollnetToTrain.id, function (err) {
-    if (err) {
-      failedTrainings.push(trollnetToTrain);
-      _trainTrollnetsOneByOne(trollnets, index++, failedTrainings, finalCallback);
-    } else {
-      if (index === trollnets.length - 1) {
-        console.log('SUCCESS RUN _trainTrollnetsOneByOne completed');
-        trollnetsWaitingForTraining = [...trollnetsWaitingForTraining, ...failedTrainings];
-        finalCallback();
-      } else {
-        console.log('SUCCESS RUN _trainTrollnetsOneByOne trained index ' + index);
+    console.log('...Interval call... _trainTrollnetsOneByOne');
+    const trollnetToTrain = trollnets[index];
+    _teachTrollnet(trollnetToTrain.id, function (err) {
+      if (err) {
+        failedTrainings.push(trollnetToTrain);
         _trainTrollnetsOneByOne(trollnets, index++, failedTrainings, finalCallback);
+      } else {
+        if (index === trollnets.length - 1) {
+          console.log('SUCCESS RUN _trainTrollnetsOneByOne COMPLETED');
+          trollnetsWaitingForTraining = [...trollnetsWaitingForTraining, ...failedTrainings];
+          finalCallback();
+        } else {
+          console.log('SUCCESS RUN _trainTrollnetsOneByOne trained index ' + index);
+          _trainTrollnetsOneByOne(trollnets, index++, failedTrainings, finalCallback);
+        }
       }
-    }
-  });
-}
+    });
+  }
+};
 
 const trollnetController = {
   trollnetDaemon,
