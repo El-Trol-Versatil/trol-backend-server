@@ -79,7 +79,6 @@ const getModelDescriptorListFromDB = function(callback) {
 
 const trollnetController = {
   modelDaemon,
-  createModel,
   getModelDescriptorListFromDB,
 };
 
