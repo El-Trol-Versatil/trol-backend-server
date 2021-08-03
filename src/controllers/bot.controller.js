@@ -1,7 +1,7 @@
 const Bot = require('../models/bot.model.js'),
   ModelController = require('../controller/model.controller.js'),
   Python = require('../providers/scripts/python.service.js'),
-  Utils = require('../helpers/utils.helper.js'),
+  Utils = require('../helpers/utils.helper.js');
 
 const _getBotFromDB = function(id, callback) {
   Bot.findOne({ id: id }, function (err, bot) {
