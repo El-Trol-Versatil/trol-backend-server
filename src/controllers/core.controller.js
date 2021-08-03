@@ -2,7 +2,6 @@ const trollnetController = require('./trollnet.controller.js');
 
 const prepareCoreInstances = function () {
   console.log('CORE prepareCoreInstances');
-  trollnetController.initializeTrollnets();
 }
 
 const setupCoreMonitors = function () {
@@ -12,9 +11,7 @@ const setupCoreMonitors = function () {
 
 const _releaseDaemons = function () {
   console.log('CORE _releaseDaemons');
-  setInterval(() => {
-    trollnetController.trollnetDaemon();
-  }, 5000);
+  trollnetController.trollnetDaemon();
 }
 
 const coreController = {

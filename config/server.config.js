@@ -13,8 +13,8 @@ const SERVER_CONFIG = {
     useNewUrlParser: true,
     useCreateIndex: true
   },
-  PYTHON_PATH : '/usr/bin/python',
-  PYTHON_SCRIPTS_PATH : '/opt/python',
+  PYTHON_PATH: 'C:\Users\adminucm\AppData\Local\Programs\Python\Python37\python',
+  PYTHON_SCRIPTS_PATH: 'C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\scripts',
 };
 
 //'mongodb://admin:password@localhost:27017,localhost:27022/etv'

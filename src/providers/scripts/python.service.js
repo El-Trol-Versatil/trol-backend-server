@@ -2,6 +2,8 @@ const pythonShell = require('python-shell'),
       SERVER_CONFIG = require('../../../config/server.config.js'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
+const COMMON_BASE_SCRIPT = 'scripts';
+
 const getParamsItem = function() {
   return {
     mode: 'json',
@@ -12,28 +14,28 @@ const getParamsItem = function() {
   };
 }
 
-// INPUT: a bot id and a bot name.
+// INPUT: a bot id, age, education level, likes and dislikes.
 // OUTPUT: the bot object.
-const createBot = function(botId, botName, callback) {
+const createBot = function(botId, age, educationLevel, likes, dislikes, callback) {
   const params = getParamsItem();
-  params.args = [botId, botName];
-  pythonShell.run(PY_SCRIPTS.CREATE_BOT, params, callback);
+  params.args = [botId, age, educationLevel, likes, dislikes];
+  _runCommand(PY_SCRIPTS.CREATE_BOT, params, callback);
 };
 
-// INPUT: an id for the model, a corpus from where to train it and some keywords associated with the model.
+// INPUT: an id for the model, a corpus path from where to train it, the list of model descriptors and the number of iterations.
 // OUTPUT: a trained model for these options.
-const trainModel = function(modelId, corpus, keywords, callback) {
+const trainModel = function(modelId, corpusPath, modelDescriptorList, iterations, callback) {
   const params = getParamsItem();
-  params.args = [modelId, corpus, keywords];
-  pythonShell.run(PY_SCRIPTS.TRAIN_MODEL, params, callback);
+  params.args = [modelId, corpusPath, modelDescriptorList, iterations];
+  _runCommand(PY_SCRIPTS.TRAIN_MODEL, params, callback);
 };
 
-// INPUT: a bot and the model that you want to teach it.
-// OUTPUT: the bot object trained at the specified model.
-const teachBot = function(bot, model, callback) {
+// INPUT: a bot and the model descriptor list.
+// OUTPUT: the bot object trained at what he likes/dislikes.
+const teachBot = function(bot, modelDescriptorList, callback) {
   const params = getParamsItem();
-  params.args = [bot, model];
-  pythonShell.run(PY_SCRIPTS.TEACH_BOT, params, callback);
+  params.args = [bot, modelDescriptorList];
+  _runCommand(PY_SCRIPTS.TEACH_BOT, params, callback);
 };
 
 // INPUT: the bot, the input thread, the filter parameters and optionally the message to reply.
@@ -41,29 +43,31 @@ const teachBot = function(bot, model, callback) {
 const answerThread = function(bot, thread, filterParams, messageToReply, callback) {
   const params = getParamsItem();
   params.args = [bot, thread, filterParams, messageToReply];
-  pythonShell.run(PY_SCRIPTS.ANSWER_THREAD, params, callback);
+  _runCommand(PY_SCRIPTS.ANSWER_THREAD, params, callback);
 };
 
-
+const _runCommand = function(command, params, callback) {
+  pythonShell.run(COMMON_BASE_SCRIPT, [command, ...params], callback);
+};
 
 // Necesito crear a Ricardo.
-// A Python le paso el nombre.
+// A Python le paso la edad, la educación, sus likes y sus dislikes.
 // Python me devuelve el objeto de Ricardo.
 
 // Necesito crear un modelo de 'futbol'.
-// A Python le paso un nombre para identificar al modelo, el corpus, los keywords.
-// Python me devuelve algo que describe al modelo, ya veremos cómo. Quizás contiene la ruta. /JSON/
+// A Python le paso un id para identificar al modelo, la ruta del corpus, el modelDescriptorList y el num de iteraciones.
+// Python me devuelve el model descriptor list actualizado.
 
-// Quiero que Ricardo aprenda de futbol.
-// A python le paso el objeto de ricardo y el modelo ('futbol')
-// Invoco enseñarBot()
+// Quiero que Ricardo aprenda más info acerca de lo que le gusta y lo que no le gusta.
+// A python le paso el objeto de ricardo y el model descriptor list.
 // Python me devuelve el objeto json de ricardo actualizado
 
 // Quiero que Ricardo hable de futbol, respuesta sencilla o respuesta a alguien:
-// A python le paso el objeto de Ricardo, le paso el "hilo" original que Ricardo "lee" y opina de ello, parámetros de filtrado, y opcionalmente la intervención de a quien tenga que responder
+// A python le paso el objeto de Ricardo, hilo en el que Ricardo quiere responder, parámetros de filtrado.
+// Los parámetros de filtrado son máximo de caracteres (-nc 280) y el número de respuestas (-nor 100, cuantas más, más probabilidad de que sea preciso).
+// getResponse "..." "asdbashdbahsd asdhbahsdbahsd " -nc 280 -nor 100
+// [opcionalmente la intervención de a quien tenga que responder iría en el contexto o meteríamos el hilo completo]
 // Python me devuelve el mensaje de Ricardo
-
-
 
 const pythonService = {
   createBot,

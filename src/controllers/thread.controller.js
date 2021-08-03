@@ -1,14 +1,20 @@
 const Bot = require('../models/bot.model.js'),
   botController = require('./bot.controller.js');
 
-const threadDaemon = function () {
-  // TODO. Still nothing needed.
+const MessageParams = {
+ MaxCharacters: 280,
+ PossibleAnswersNumber: 100, 
+};
+
+const _getFilterParams = function () {
+  return '-nc ' + MessageParams.MaxCharacters + ' '
+       + '-nor ' + MessageParams.PossibleAnswersNumber;
 }
 
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
 const createConversation = function (topic, members) {
-  const dataArray = [topic, members, {}, 0, (members.length)^2, null, [], []];
+  const dataArray = [topic, members, _getFilterParams(), 0, (members.length)^2, null, [], []];
   _followConversation(dataArray, function (conversation) {
     if (!conversation) {
       console.log('FAILED RUN createConversation');
@@ -46,9 +52,9 @@ const _followConversation = function (
         to: memberToReply,
         content: answer,
       });
-      saveLastTalker(talkersIndexes, lastTalker);
+      _saveLastTalker(talkersIndexes, lastTalker);
     }
-    if (answerIndex < maxAnswers) {
+    if (answerIndex < maxAnswers - 1) {
       _followConversation([topic, members, filterParams, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray]);
     } else {
       callback(messageArray);
@@ -75,8 +81,8 @@ const _shouldReplyOrJustAnswer = function (answerIndex, maxAnswers) {
 }
 
 // It accepts the topic about which we want an answer.
-const _generateAnswer = function (botId, topic, type) {
-  botController.answerThread(botId, topic, type, function (err, answer) {
+const _generateAnswer = function (botId, topic, filterParams) {
+  botController.answerThread(botId, topic, filterParams, function (err, answer) {
     if (err) {
       console.log('FAILED RUN _generateAnswer ' + botId);
       callback(null);
@@ -88,7 +94,7 @@ const _generateAnswer = function (botId, topic, type) {
 }
 
 // Save last talker as last in queue order.
-const saveLastTalker = function (talkersIndexes, lastTalker) {
+const _saveLastTalker = function (talkersIndexes, lastTalker) {
   const alreadyTalked = talkersIndexes.indexOf(lastTalker);
   if (alreadyTalked !== -1) {
     talkersIndexes.splice(alreadyTalked, 1);
@@ -97,7 +103,6 @@ const saveLastTalker = function (talkersIndexes, lastTalker) {
 }
 
 const threadController = {
-  threadDaemon,
   createConversation,
 };
 
