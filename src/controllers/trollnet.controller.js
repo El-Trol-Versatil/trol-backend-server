@@ -5,7 +5,7 @@ const Trollnet = require('../models/trollnet.model.js'),
   Utils = require('../helpers/utils.helper.js');
 
 const DAEMON_INTERVAL_TIME = 15000;
-const trollnetsWaitingForTraining = [];
+let trollnetsWaitingForTraining = [];
 
 const trollnetDaemon = function () {
   console.log('Starting trollnetDaemon...');
