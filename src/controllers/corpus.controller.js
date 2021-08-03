@@ -22,7 +22,7 @@ const _createCorpus = function(path, callback) {
   let newCorpus = new Corpus({
     id: 'corpus' + generatedId,
     path: path,
-    isNew: true,
+    isNewCorpus: true,
   });
   newCorpus.save(function (err, corpus) {
     if (err) {
@@ -36,7 +36,7 @@ const _createCorpus = function(path, callback) {
 };
 
 const getAllNewCorpuses = function(callback) {
-  Corpus.find({isNew: true}, '-_id -__v', function (err, corpuses) {
+  Corpus.find({ isNewCorpus: true }, '-_id -__v', function (err, corpuses) {
     if (err) {
       console.log('FAILED GET getAllNewCorpuses');
       callback(null);
@@ -48,7 +48,7 @@ const getAllNewCorpuses = function(callback) {
 };
 
 const markAsUsed = function(id, callback) {
-  Corpus.update({ id }, { $set: { isNew: false } }, function (err) {
+  Corpus.update({ id }, { $set: { isNewCorpus: false } }, function (err) {
     if (err) {
       console.log('FAILED RUN markAsUsed ' + id);
       callback(err);

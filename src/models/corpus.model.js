@@ -7,7 +7,7 @@ const CorpusSchema = mongoose.Schema({
   path: { type: String,
           required: true,
           unique: true },
-  isNew: { type: Boolean,
+  isNewCorpus: { type: Boolean,
           required: true },
 });
 
