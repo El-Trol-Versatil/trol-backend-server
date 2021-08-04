@@ -14,7 +14,7 @@ const SERVER_CONFIG = {
     useCreateIndex: true
   },
   PYTHON_PATH: "C:\\Users\\adminucm\\AppData\\Local\\Programs\\Python\\Python37\\python",
-  PYTHON_SCRIPTS_PATH: "C:\\/Users\\adminucm\\Desktop\\etv-backend\\ETV-models-and-bots\\ETV\\scripts",
+  PYTHON_SCRIPTS_PATH: "C:\\/Users\\adminucm\\Desktop\\etv-backend\\ETV-models-and-bots\\ETV",
 };
 
 //'mongodb://admin:password@localhost:27017,localhost:27022/etv'
