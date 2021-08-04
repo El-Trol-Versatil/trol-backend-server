@@ -1,4 +1,4 @@
-const pythonShell = require('python-shell'),
+const {PythonShell} = require('python-shell'),
       SERVER_CONFIG = require('../../../config/server.config.js'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
