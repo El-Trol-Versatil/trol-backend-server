@@ -5,6 +5,11 @@ const FileSystem = require('../providers/filesystem/filesystem.service.js'),
 // TODO:  HILAR FINO - adjust corpusesFolder to real value
 const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus`;
 
+const _filterFileName = function(filePath) {
+  const stringArray = filePath.split(corpusesFolder);
+  return stringArray[1];
+}
+
 const corpusDaemon = function () {
   FileSystem.onNewFileAdded(corpusesFolder, function(corpusPath) {
     _createCorpus(corpusPath, function(err) {
@@ -18,18 +23,19 @@ const corpusDaemon = function () {
  }
 
 const _createCorpus = function(path, callback) {
-  const generatedId = Utils.generateId();
+  const generatedId = Utils.generateId(),
+  fileName = _filterFileName(path);
   let newCorpus = new Corpus({
     id: 'corpus' + generatedId,
-    path: path,
+    fileName: fileName,
     isNewCorpus: true,
   });
   newCorpus.save(function (err, corpus) {
     if (err) {
-      console.log('FAILED RUN _createCorpus ' + path);
+      console.log('FAILED RUN _createCorpus ' + fileName);
       callback(err);
     } else {
-      console.log('SUCCESS RUN _createCorpus ' + path);
+      console.log('SUCCESS RUN _createCorpus ' + fileName);
       callback(null);
     }
   });

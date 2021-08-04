@@ -24,7 +24,7 @@ const _checkPendingCorpuses = function() {
 // Recursive method that will call itself for each following model to be trained from a corpus.
 const _followCorpusTraining = function(corpusArray, corpusIndex, totalCorpuses, callback) {
   const corpus = corpusArray[corpusIndex];
-  _trainModel(corpus.path, function(err) {
+  _trainModel(corpus.fileName, function(err) {
     if (!err) {
       CorpusController.markAsUsed(corpus.id);
     }
@@ -37,25 +37,25 @@ const _followCorpusTraining = function(corpusArray, corpusIndex, totalCorpuses, 
   });
 }
 
-const _trainModel = function(corpusPath, callback) {
+const _trainModel = function(corpusFileName, callback) {
   getModelDescriptorListFromDB(function (modelDescriptorList) {
     const generatedId = Utils.generateId(),
       modelId = 'model' + generatedId;
     Python.trainModel(modelId,
-      corpusPath,
+      corpusFileName,
       modelDescriptorList,
       ITERATIONS_DEFAULT, function (err, updatedModelDescriptorList) {
       if (err) {
-        console.log('FAILED RUN _trainModel ' + corpusPath);
+        console.log('FAILED RUN _trainModel ' + corpusFileName);
         callback(err);
       } else {
         // TODO: HILAR FINO - version value for PythonFiles only object, somewhere as a constant?
         PythonFiles.update({ version: '12345' }, { $set: { modelDescriptorList: updatedModelDescriptorList } }, function (err, corpus) {
           if (err) {
-            console.log('FAILED RUN _trainModel ' + corpusPath);
+            console.log('FAILED RUN _trainModel ' + corpusFileName);
             callback(err);
           } else {
-            console.log('SUCCESS RUN _trainModel ' + corpusPath);
+            console.log('SUCCESS RUN _trainModel ' + corpusFileName);
             callback(null);
           }
         });
