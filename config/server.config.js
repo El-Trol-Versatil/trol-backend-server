@@ -13,7 +13,7 @@ const SERVER_CONFIG = {
     useNewUrlParser: true,
     useCreateIndex: true
   },
-  PYTHON_PATH: String.raw`C:\Users\adminucm\AppData\Local\Programs\Python\Python37\python`,
+  PYTHON_PATH: String.raw`C:\Users\adminucm\envETV\Scripts\python`,
   PYTHON_SCRIPTS_PATH: String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV`,
 };
 
