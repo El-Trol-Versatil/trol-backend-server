@@ -2,7 +2,7 @@ const {PythonShell} = require('python-shell'),
       SERVER_CONFIG = require('../../../config/server.config.js'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
-const COMMON_BASE_SCRIPT = 'scripts';
+const COMMON_BASE_SCRIPT = 'scripts.py';
 
 const getParamsItem = function() {
   return {
