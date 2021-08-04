@@ -19,7 +19,7 @@ const getParamsItem = function() {
 const createBot = function(botId, age, educationLevel, likes, dislikes, callback) {
   const params = getParamsItem();
   params.args = [PY_SCRIPTS.CREATE_BOT, botId, age, educationLevel, likes, dislikes];
-  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
+  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: an id for the model, a corpus path from where to train it, the list of model descriptors and the number of iterations.
@@ -27,7 +27,7 @@ const createBot = function(botId, age, educationLevel, likes, dislikes, callback
 const trainModel = function(modelId, corpusPath, modelDescriptorList, iterations, callback) {
   const params = getParamsItem();
   params.args = [PY_SCRIPTS.TRAIN_MODEL, modelId, corpusPath, modelDescriptorList, iterations];
-  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
+  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: a bot and the model descriptor list.
@@ -35,7 +35,7 @@ const trainModel = function(modelId, corpusPath, modelDescriptorList, iterations
 const teachBot = function(bot, modelDescriptorList, callback) {
   const params = getParamsItem();
   params.args = [PY_SCRIPTS.TEACH_BOT, bot, modelDescriptorList];
-  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
+  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: the bot, the input thread, the filter parameters and optionally the message to reply.
@@ -43,7 +43,7 @@ const teachBot = function(bot, modelDescriptorList, callback) {
 const answerThread = function(bot, thread, filterParams, messageToReply, callback) {
   const params = getParamsItem();
   params.args = [PY_SCRIPTS.ANSWER_THREAD, bot, thread, filterParams, messageToReply];
-  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
+  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // Necesito crear a Ricardo.
