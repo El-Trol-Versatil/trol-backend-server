@@ -14,11 +14,11 @@ const getParamsItem = function() {
   };
 }
 
-// INPUT: a bot id, age, education level, likes and dislikes.
+// INPUT: bot params like age, education level, likes and dislikes.
 // OUTPUT: the bot object.
-const createBot = function(botId, age, educationLevel, likes, dislikes, callback) {
+const createBot = function(age, educationLevel, likes, dislikes, callback) {
   const params = getParamsItem();
-  params.args = [PY_SCRIPTS.CREATE_BOT, botId, age, educationLevel, likes, dislikes];
+  params.args = [PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes];
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 

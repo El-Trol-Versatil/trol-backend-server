@@ -52,7 +52,7 @@ const _getRandomParams = function(params, callback) {
 //RUN - Train a given bot
 const _createBot = function(params, callback) {
   const generatedId = Utils.generateId();
-  Python.createBot(generatedId,
+  Python.createBot(
     params.age,
     params.educationLevel,
     params.likes,
