@@ -6,7 +6,7 @@ const COMMON_BASE_SCRIPT = 'scripts.py';
 
 const getParamsItem = function() {
   return {
-    mode: 'json',
+    mode: 'text',
     pythonPath: SERVER_CONFIG.PYTHON_PATH,
     pythonOptions: undefined,//['-u']
     scriptPath: SERVER_CONFIG.PYTHON_SCRIPTS_PATH,
