@@ -18,36 +18,32 @@ const getParamsItem = function() {
 // OUTPUT: the bot object.
 const createBot = function(botId, age, educationLevel, likes, dislikes, callback) {
   const params = getParamsItem();
-  params.args = [botId, age, educationLevel, likes, dislikes];
-  _runCommand(PY_SCRIPTS.CREATE_BOT, params, callback);
+  params.args = [PY_SCRIPTS.CREATE_BOT, botId, age, educationLevel, likes, dislikes];
+  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: an id for the model, a corpus path from where to train it, the list of model descriptors and the number of iterations.
 // OUTPUT: a trained model for these options.
 const trainModel = function(modelId, corpusPath, modelDescriptorList, iterations, callback) {
   const params = getParamsItem();
-  params.args = [modelId, corpusPath, modelDescriptorList, iterations];
-  _runCommand(PY_SCRIPTS.TRAIN_MODEL, params, callback);
+  params.args = [PY_SCRIPTS.TRAIN_MODEL, modelId, corpusPath, modelDescriptorList, iterations];
+  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: a bot and the model descriptor list.
 // OUTPUT: the bot object trained at what he likes/dislikes.
 const teachBot = function(bot, modelDescriptorList, callback) {
   const params = getParamsItem();
-  params.args = [bot, modelDescriptorList];
-  _runCommand(PY_SCRIPTS.TEACH_BOT, params, callback);
+  params.args = [PY_SCRIPTS.TEACH_BOT, bot, modelDescriptorList];
+  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: the bot, the input thread, the filter parameters and optionally the message to reply.
 // OUTPUT: the conversation output message.
 const answerThread = function(bot, thread, filterParams, messageToReply, callback) {
   const params = getParamsItem();
-  params.args = [bot, thread, filterParams, messageToReply];
-  _runCommand(PY_SCRIPTS.ANSWER_THREAD, params, callback);
-};
-
-const _runCommand = function(command, params, callback) {
-  pythonShell.run(COMMON_BASE_SCRIPT, [command, ...params], callback);
+  params.args = [PY_SCRIPTS.ANSWER_THREAD, bot, thread, filterParams, messageToReply];
+  pythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // Necesito crear a Ricardo.
