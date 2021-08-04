@@ -85,7 +85,7 @@ const _createBot = function(params, callback) {
 //RUN - Train a given bot
 const teachBotArray = function(botList, callback) {
   ModelController.getModelDescriptorListFromDB(function (modelDescriptorList) {
-    _followBotTeaching(botList, 0, botList.length, modelDescriptorList || '', function () {
+    _followBotTeaching(botList, 0, botList.length, modelDescriptorList, function () {
       console.log('SUCCESS RUN teachBotArray');
       callback(null);
     });

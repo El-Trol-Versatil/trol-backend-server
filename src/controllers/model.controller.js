@@ -38,9 +38,8 @@ const _followCorpusTraining = function(corpusArray, corpusIndex, totalCorpuses, 
 }
 
 const _trainModel = function(corpusPath, callback) {
-  getModelDescriptorListFromDB(function (modelDescriptorListDB) {
-    const modelDescriptorList = modelDescriptorListDB || '',
-      generatedId = Utils.generateId(),
+  getModelDescriptorListFromDB(function (modelDescriptorList) {
+    const generatedId = Utils.generateId(),
       modelId = 'model' + generatedId;
     Python.trainModel(modelId,
       corpusPath,
@@ -72,8 +71,8 @@ const getModelDescriptorListFromDB = function(callback) {
       console.log('FAILED getModelDescriptorListFromDB');
       callback(null);
     } else {
-      const object = pythonFilesData.toObject();
-      callback(object.modelDescriptorList);
+      const modelDescriptorList = pythonFilesData ? pythonFilesData.modelDescriptorList : '';
+      callback(modelDescriptorList);
     }
   });
 };
