@@ -201,17 +201,16 @@ const _trainTrollnetsOneByOne = function(trollnets, index, failedTrainings, fina
     const trollnetToTrain = trollnets[index];
     _teachTrollnet(trollnetToTrain.id, function (err) {
       if (err) {
-        failedTrainings.push(trollnetToTrain);
-        _trainTrollnetsOneByOne(trollnets, index++, failedTrainings, finalCallback);
+        !!err && failedTrainings.push(trollnetToTrain);
+      }
+      if (index === trollnets.length - 1) {
+        console.log('SUCCESS RUN _trainTrollnetsOneByOne COMPLETED');
+        trollnetsWaitingForTraining = [...trollnetsWaitingForTraining, ...failedTrainings];
+        finalCallback();
       } else {
-        if (index === trollnets.length - 1) {
-          console.log('SUCCESS RUN _trainTrollnetsOneByOne COMPLETED');
-          trollnetsWaitingForTraining = [...trollnetsWaitingForTraining, ...failedTrainings];
-          finalCallback();
-        } else {
-          console.log('SUCCESS RUN _trainTrollnetsOneByOne trained index ' + index);
-          _trainTrollnetsOneByOne(trollnets, index++, failedTrainings, finalCallback);
-        }
+        console.log('SUCCESS RUN _trainTrollnetsOneByOne trained index ' + index);
+        index = index + 1;
+        _trainTrollnetsOneByOne(trollnets, index, failedTrainings, finalCallback);
       }
     });
   }

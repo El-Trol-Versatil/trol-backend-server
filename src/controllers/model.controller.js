@@ -24,12 +24,13 @@ const _checkPendingCorpuses = function() {
 // Recursive method that will call itself for each following model to be trained from a corpus.
 const _followCorpusTraining = function(corpusArray, corpusIndex, totalCorpuses, callback) {
   const corpus = corpusArray[corpusIndex];
-  _trainModel(corpusPath, function(err) {
+  _trainModel(corpus.path, function(err) {
     if (!err) {
       CorpusController.markAsUsed(corpus.id);
     }
     if (corpusIndex < totalCorpuses - 1) {
-      _followCorpusTraining(corpusArray, corpusIndex++, totalCorpuses, callback);
+      corpusIndex = corpusIndex + 1;
+      _followCorpusTraining(corpusArray, corpusIndex, totalCorpuses, callback);
     } else {
       callback();
     };
@@ -77,9 +78,9 @@ const getModelDescriptorListFromDB = function(callback) {
   });
 };
 
-const trollnetController = {
+const modelController = {
   modelDaemon,
   getModelDescriptorListFromDB,
 };
 
-module.exports = trollnetController;
+module.exports = modelController;

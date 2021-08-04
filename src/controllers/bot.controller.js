@@ -32,7 +32,8 @@ const _followBotCreation = function(botList, botIndex, totalBots, params, callba
       botList.push(generatedId);
     }
     if (botIndex < totalBots - 1) {
-      _followBotCreation(botList, botIndex++, totalBots, params, callback);
+      botIndex = botIndex + 1;
+      _followBotCreation(botList, botIndex, totalBots, params, callback);
     } else {
       callback();
     };
@@ -96,7 +97,8 @@ const _followBotTeaching = function(botList, botIndex, totalBots, modelDescripto
   const botId = botList[botIndex];
   _teachBot(botId, modelDescriptorList, function (err) {
     if (botIndex < totalBots - 1) {
-      _followBotTeaching(botList, botIndex++, totalBots, modelDescriptorList, callback);
+      botIndex = botIndex + 1;
+      _followBotTeaching(botList, botIndex, totalBots, modelDescriptorList, callback);
     } else {
       callback();
     };
@@ -155,10 +157,10 @@ const answerThread = function(botId, thread, filterParams, messageToReply, callb
   });
 }
 
-const trollnetController = {
+const botController = {
   createBotArray,
   teachBotArray,
   answerThread,
 };
 
-module.exports = trollnetController;
+module.exports = botController;

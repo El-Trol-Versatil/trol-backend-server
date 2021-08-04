@@ -55,6 +55,7 @@ const _followConversation = function (
       _saveLastTalker(talkersIndexes, lastTalker);
     }
     if (answerIndex < maxAnswers - 1) {
+      answerIndex = answerIndex + 1;
       _followConversation([topic, members, filterParams, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray]);
     } else {
       callback(messageArray);
