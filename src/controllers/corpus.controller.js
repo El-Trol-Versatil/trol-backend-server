@@ -6,9 +6,9 @@ const FileSystem = require('../providers/filesystem/filesystem.service.js'),
 const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus`;
 
 const _filterFileName = function(filePath) {
-  const filter = String.raw`${corpusesFolder}\\`,
-    stringArray = filePath.split(filter);
-  return stringArray[1];
+  const stringArray = filePath.split(corpusesFolder),
+    splitRelativePath = stringArray[1].split("\\");
+  return splitRelativePath[1];
 }
 
 const corpusDaemon = function () {
