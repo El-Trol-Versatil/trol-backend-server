@@ -27,10 +27,10 @@ const _createCorpus = function(path, callback) {
   newCorpus.save(function (err, corpus) {
     if (err) {
       console.log('FAILED RUN _createCorpus ' + path);
-      callback(null);
+      callback(err);
     } else {
       console.log('SUCCESS RUN _createCorpus ' + path);
-      callback(path);
+      callback(null);
     }
   });
 };

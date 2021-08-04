@@ -1,5 +1,6 @@
 const trollnetController = require('./trollnet.controller.js'),
-  corpusController = require('./corpus.controller.js');
+  corpusController = require('./corpus.controller.js'),
+  modelController = require('./model.controller.js');
 
 const prepareCoreInstances = function () {
   console.log('CORE prepareCoreInstances');
@@ -14,6 +15,7 @@ const _releaseDaemons = function () {
   console.log('CORE _releaseDaemons');
   trollnetController.trollnetDaemon();
   corpusController.corpusDaemon();
+  modelController.modelDaemon();
 }
 
 const coreController = {
