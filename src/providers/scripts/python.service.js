@@ -3,7 +3,7 @@ const {PythonShell} = require('python-shell'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
 const COMMON_BASE_SCRIPT = 'scripts.py',
-  WORKING_DIRECTORY = String.raw`--wd C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV`;
+  WORKING_DIRECTORY = String.raw`--wd C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV`;
 
 const getParamsItem = function(specificParams) {
   return {
