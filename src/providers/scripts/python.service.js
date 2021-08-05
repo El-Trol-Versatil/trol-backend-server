@@ -15,12 +15,6 @@ const getParamsItem = function(specificParams) {
   };
 }
 
-// Must be called only once when repositories are downloaded to the machine.
-const setupBaseModel = function(callback) {
-  const params = getParamsItem([PY_SCRIPTS.SETUP_BASE_MODEL]);
-  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
-};
-
 // INPUT: bot params like age, education level, likes and dislikes.
 // OUTPUT: the bot object.
 const createBot = function(age, educationLevel, likes, dislikes, callback) {
