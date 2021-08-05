@@ -8,7 +8,6 @@ const COMMON_BASE_SCRIPT = 'scripts.py',
 const getParamsItem = function(specificParams) {
   return {
     mode: 'text',
-    workingDirectory: '',
     pythonPath: SERVER_CONFIG.PYTHON_PATH,
     pythonOptions: undefined,//['-u']
     scriptPath: SERVER_CONFIG.PYTHON_SCRIPTS_PATH,
