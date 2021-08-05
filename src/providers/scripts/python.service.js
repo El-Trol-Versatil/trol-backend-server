@@ -3,7 +3,7 @@ const {PythonShell} = require('python-shell'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
 const COMMON_BASE_SCRIPT = 'scripts.py',
-  WORKING_DIRECTORY = String.raw`--wd C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV`;
+  WORKING_DIRECTORY = String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV`;
 
 const getParamsItem = function(specificParams) {
   return {
@@ -11,7 +11,7 @@ const getParamsItem = function(specificParams) {
     pythonPath: SERVER_CONFIG.PYTHON_PATH,
     pythonOptions: undefined,//['-u']
     scriptPath: SERVER_CONFIG.PYTHON_SCRIPTS_PATH,
-    args: [...specificParams, WORKING_DIRECTORY]
+    args: [...specificParams, '--wd', WORKING_DIRECTORY]
   };
 }
 
