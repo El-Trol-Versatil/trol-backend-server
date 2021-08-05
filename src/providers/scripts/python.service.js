@@ -3,7 +3,7 @@ const {PythonShell} = require('python-shell'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
 const COMMON_BASE_SCRIPT = 'scripts.py',
-  WORKING_DIRECTORY = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\\`;
+  WORKING_DIRECTORY = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV`.append("\\");
 
 const getParamsItem = function(specificParams) {
   return {
@@ -19,6 +19,7 @@ const getParamsItem = function(specificParams) {
 // OUTPUT: the bot object.
 const createBot = function(age, educationLevel, likes, dislikes, callback) {
   const params = getParamsItem([PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes]);
+  console.log('PYTHON createBot ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
@@ -26,6 +27,7 @@ const createBot = function(age, educationLevel, likes, dislikes, callback) {
 // OUTPUT: a trained model for these options.
 const trainModel = function(modelId, fileName, modelDescriptorList, iterations, callback) {
   const params = getParamsItem([PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, modelDescriptorList, '-n', iterations]);
+  console.log('PYTHON trainModel ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
@@ -33,6 +35,7 @@ const trainModel = function(modelId, fileName, modelDescriptorList, iterations, 
 // OUTPUT: the bot object trained at what he likes/dislikes.
 const teachBot = function(bot, modelDescriptorList, callback) {
   const params = getParamsItem([PY_SCRIPTS.TEACH_BOT, bot, modelDescriptorList]);
+  console.log('PYTHON teachBot ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
@@ -40,6 +43,7 @@ const teachBot = function(bot, modelDescriptorList, callback) {
 // OUTPUT: the conversation output message.
 const answerThread = function(bot, thread, filterParams, messageToReply, callback) {
   const params = getParamsItem([PY_SCRIPTS.ANSWER_THREAD, bot, thread, filterParams, messageToReply]);
+  console.log('PYTHON answerThread ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
