@@ -6,8 +6,9 @@ const trollnetController = require('./trollnet.controller.js'),
 const prepareCoreInstances = function () {
   setTimeout(function () {
     console.log('RUNNING setupBaseModel');
-    Python.setupBaseModel(function (atr1, atr2, atr3, atr4) {
-      console.log('FINISHED setupBaseModel');
+    Python.setupBaseModel(function (atr1, atr2) {
+      !!atr1 && console.log('FINISHED setupBaseModel ' + JSON.stringify(atr1));
+      !!atr2 && console.log('FINISHED setupBaseModel ' + JSON.stringify(atr2));
     });
   }, 15000);
 
