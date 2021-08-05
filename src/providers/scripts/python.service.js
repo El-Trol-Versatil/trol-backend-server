@@ -2,47 +2,45 @@ const {PythonShell} = require('python-shell'),
       SERVER_CONFIG = require('../../../config/server.config.js'),
       PY_SCRIPTS = require('../../constants/python.constants.js');
 
-const COMMON_BASE_SCRIPT = 'scripts.py';
+const COMMON_BASE_SCRIPT = 'scripts.py',
+  WORKING_DIRECTORY = String.raw`--wd C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV`;
 
-const getParamsItem = function() {
+const getParamsItem = function(specificParams) {
   return {
     mode: 'text',
+    workingDirectory: '',
     pythonPath: SERVER_CONFIG.PYTHON_PATH,
     pythonOptions: undefined,//['-u']
     scriptPath: SERVER_CONFIG.PYTHON_SCRIPTS_PATH,
-    args: undefined//['value1', 'value2', 'value3']
+    args: [...specificParams, WORKING_DIRECTORY]
   };
 }
 
 // INPUT: bot params like age, education level, likes and dislikes.
 // OUTPUT: the bot object.
 const createBot = function(age, educationLevel, likes, dislikes, callback) {
-  const params = getParamsItem();
-  params.args = [PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes];
+  const params = getParamsItem([PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: an id for the model, a corpus file name from where to train it, the list of model descriptors and the number of iterations.
 // OUTPUT: a trained model for these options.
 const trainModel = function(modelId, fileName, modelDescriptorList, iterations, callback) {
-  const params = getParamsItem();
-  params.args = [PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, modelDescriptorList, iterations];
+  const params = getParamsItem([PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, modelDescriptorList, iterations]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: a bot and the model descriptor list.
 // OUTPUT: the bot object trained at what he likes/dislikes.
 const teachBot = function(bot, modelDescriptorList, callback) {
-  const params = getParamsItem();
-  params.args = [PY_SCRIPTS.TEACH_BOT, bot, modelDescriptorList];
+  const params = getParamsItem([PY_SCRIPTS.TEACH_BOT, bot, modelDescriptorList]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
 // INPUT: the bot, the input thread, the filter parameters and optionally the message to reply.
 // OUTPUT: the conversation output message.
 const answerThread = function(bot, thread, filterParams, messageToReply, callback) {
-  const params = getParamsItem();
-  params.args = [PY_SCRIPTS.ANSWER_THREAD, bot, thread, filterParams, messageToReply];
+  const params = getParamsItem([PY_SCRIPTS.ANSWER_THREAD, bot, thread, filterParams, messageToReply]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
