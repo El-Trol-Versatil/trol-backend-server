@@ -63,7 +63,6 @@ const answerThread = function(bot, thread, filterParams, messageToReply, callbac
 // Python me devuelve el mensaje de Ricardo
 
 const pythonService = {
-  setupBaseModel,
   createBot,
   trainModel,
   teachBot,
