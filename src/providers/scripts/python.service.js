@@ -17,7 +17,7 @@ const getParamsItem = function(specificParams) {
 
 // Must be called only once when repositories are downloaded to the machine.
 const setupBaseModel = function(callback) {
-  const params = getParamsItem([]);
+  const params = getParamsItem([PY_SCRIPTS.SETUP_BASE_MODEL]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 
