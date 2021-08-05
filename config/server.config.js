@@ -14,7 +14,8 @@ const SERVER_CONFIG = {
     useCreateIndex: true
   },
   PYTHON_PATH: String.raw`C:\Users\adminucm\envETV\Scripts\python`,
-  PYTHON_SCRIPTS_PATH: String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV`,
+  PYTHON_SCRIPTS_PATH: String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV`,
+  WORKING_DIRECTORY: String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\ `.trim(),
 };
 
 //'mongodb://admin:password@localhost:27017,localhost:27022/etv'
