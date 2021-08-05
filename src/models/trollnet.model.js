@@ -5,12 +5,14 @@ const TrollnetSchema = mongoose.Schema({
                  required: true,
                  unique: true },
   isActive:    { type: Boolean,
-                 required: true },              
+                 required: true },
   properties:  { type: mongoose.Schema.Types.Mixed,
                  required: true },
   botList:    [{ type: String,
                  required: true }],
-  lastTrained: { type: Date }, 
+  status:      { type: String,
+                 required: true },
+  lastTrained: { type: Date },
 });
 
 module.exports = mongoose.model('Trollnet', TrollnetSchema);
