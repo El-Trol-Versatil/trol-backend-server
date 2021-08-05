@@ -2,7 +2,9 @@ const FileSystem = require('../providers/filesystem/filesystem.service.js'),
   Corpus = require('../models/corpus.model.js'),
   Utils = require('../helpers/utils.helper.js');
 
-const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus`;
+const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus`,
+  avoidSubPath = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus\tokenizedRawCorpus`;
+
 
 const _filterFileName = function(filePath) {
   const stringArray = filePath.split(corpusesFolder),
@@ -11,7 +13,7 @@ const _filterFileName = function(filePath) {
 }
 
 const corpusDaemon = function () {
-  FileSystem.onNewFileAdded(corpusesFolder, function(corpusPath) {
+  FileSystem.onNewFileAdded(corpusesFolder, avoidSubPath, function(corpusPath) {
     _createCorpus(corpusPath, function(err) {
       if (err) {
         console.log('FAILED RUN onNewFileAdded path ' + corpusPath);

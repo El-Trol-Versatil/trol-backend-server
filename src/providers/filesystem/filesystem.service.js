@@ -27,9 +27,9 @@ const scanFolder = function(folder, callback) {
 
 // for scanning folder file changes:
 // testFolder = './tests/';
-const onNewFileAdded = function(folder, callback) {
+const onNewFileAdded = function(folder, avoidFolder, callback) {
   console.log('fileSystemService onNewFileAdded LISTENING for path', folder);
-  const watcher = chokidar.watch(folder, {ignored: /^\./, persistent: true});
+  const watcher = chokidar.watch(folder, {ignored: avoidFolder, persistent: true});
   watcher
     .on('add', function(path) {
       console.log('File', path, 'has been added');
