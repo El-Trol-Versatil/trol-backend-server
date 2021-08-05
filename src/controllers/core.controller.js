@@ -1,8 +1,13 @@
 const trollnetController = require('./trollnet.controller.js'),
   corpusController = require('./corpus.controller.js'),
+  Python = require('../providers/scripts/python.service.js'),
   modelController = require('./model.controller.js');
 
 const prepareCoreInstances = function () {
+  console.log('RUNNING setupBaseModel');
+  Python.setupBaseModel(function () {
+    console.log('FINISHED setupBaseModel');
+  });
   console.log('CORE prepareCoreInstances');
 }
 

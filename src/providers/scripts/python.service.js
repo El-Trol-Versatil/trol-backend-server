@@ -15,6 +15,12 @@ const getParamsItem = function(specificParams) {
   };
 }
 
+// Must be called only once when repositories are downloaded to the machine.
+const setupBaseModel = function(callback) {
+  const params = getParamsItem([]);
+  PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
+};
+
 // INPUT: bot params like age, education level, likes and dislikes.
 // OUTPUT: the bot object.
 const createBot = function(age, educationLevel, likes, dislikes, callback) {
@@ -63,6 +69,7 @@ const answerThread = function(bot, thread, filterParams, messageToReply, callbac
 // Python me devuelve el mensaje de Ricardo
 
 const pythonService = {
+  setupBaseModel,
   createBot,
   trainModel,
   teachBot,
