@@ -2,8 +2,8 @@ const FileSystem = require('../providers/filesystem/filesystem.service.js'),
   Corpus = require('../models/corpus.model.js'),
   Utils = require('../helpers/utils.helper.js');
 
-const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\rawCorpus`,
-  avoidSubPath = String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\rawCorpus\tokenizedRawCorpus`;
+const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus`,
+  avoidSubPath = String.raw`C:\Users\adminucm\Desktop\etv-backend\ETV-models-and-bots\ETV\rawCorpus\tokenizedRawCorpus`;
 
 
 const _filterFileName = function(filePath) {
