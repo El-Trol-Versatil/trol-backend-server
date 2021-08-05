@@ -41,13 +41,33 @@ const _followBotCreation = function(botList, botIndex, totalBots, params, callba
 }
 
 const _getRandomParams = function(params, callback) {
-  // TODO: HILAR FINO - adjust to what the params model is and RANDOMIZE
-  return {
-    age: 25,
-    educationLevel: 1, // 0-1-2
-    likes: ['Real Madrid', 'Beethoven', 'Miel'],
-    dislikes: ['Barcelona', 'Mozart', 'Jalea'],
+  // // // TODO: HILAR FINO - do not override, use real values input
+  params = {
+    ageInterval: { values: [18, 55] },
+    culturalLevel: { values: [0, 2] },
+    keywords: { values: ['Tokio', 'La Casa de Papel', 'El Árbol De La Sangre'] },
+    likes: { values: ['Real Madrid', 'Beethoven', 'Miel'] },
+    dislikes: { values: ['Barcelona', 'Mozart', 'Jalea'] },
   };
+  // // //
+
+  const fieldsToRandomize = [
+    // 'genders',
+    'ageInterval',
+    // 'ethnicity',
+    'culturalLevel',
+    'keywords',
+    'likes',
+    'dislikes',
+  ], randomParams = {};
+  fieldsToRandomize.forEach(field => {
+    const values = params[field].values,
+      randomResults = values[0] instanceof String
+      ? Utils.randomStrings(values)
+      : Utils.roundedRandomNumber(values.lower, values.upper)
+    randomParams[field] = randomResults;
+  });
+  return randomParams;
 }
 
 //RUN - Train a given bot
