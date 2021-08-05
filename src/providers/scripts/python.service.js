@@ -25,7 +25,7 @@ const createBot = function(age, educationLevel, likes, dislikes, callback) {
 // INPUT: an id for the model, a corpus file name from where to train it, the list of model descriptors and the number of iterations.
 // OUTPUT: a trained model for these options.
 const trainModel = function(modelId, fileName, modelDescriptorList, iterations, callback) {
-  const params = getParamsItem([PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, modelDescriptorList, iterations]);
+  const params = getParamsItem([PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, modelDescriptorList, '-n', iterations]);
   PythonShell.run(COMMON_BASE_SCRIPT, params, callback);
 };
 

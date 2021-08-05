@@ -3,7 +3,7 @@ const PythonFiles = require('../models/pythonFiles.model.js'),
   Python = require('../providers/scripts/python.service.js'),
   Utils = require('../helpers/utils.helper.js');
 
-const ITERATIONS_DEFAULT = '-n 50',
+const ITERATIONS_DEFAULT = 50,
   CHECK_NEW_MODEL_INTERVAL_TIME = 60000;
 
 const modelDaemon = function () {
