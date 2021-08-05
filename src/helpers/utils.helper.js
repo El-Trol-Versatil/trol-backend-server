@@ -8,8 +8,8 @@ const roundedRandomNumber = function(min, max) {
 
 const randomStrings = function(stringArray) {
   const minArraySize = Math.ceil(stringArray.length * 0.60),
-    minArraySize = Math.floor(stringArray.length * 0.90),
-    numberOfElements = roundedRandomNumber(minArraySize, minArraySize),
+    maxArraySize = Math.floor(stringArray.length * 0.90),
+    numberOfElements = roundedRandomNumber(minArraySize, maxArraySize),
     finalValues = stringArray.slice();
   for (let index = 0; index < stringArray.length - numberOfElements; index++) {
     const randomIndex = roundedRandomNumber(0, numberOfElements - index);
