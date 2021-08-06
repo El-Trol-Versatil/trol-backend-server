@@ -15,7 +15,7 @@ const SERVER_CONFIG = {
   },
   PYTHON_PATH: String.raw`C:\Users\adminucm\envETV\Scripts\python`,
   PYTHON_SCRIPTS_PATH: String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV`,
-  WORKING_DIRECTORY: String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\ `.trim(),
+  WORKING_DIRECTORY: String.raw`C:/Users/adminucm/Desktop/etv-backend/trol-backend-server/pythonETV/`,
 };
 
 //'mongodb://admin:password@localhost:27017,localhost:27022/etv'
