@@ -1,20 +1,9 @@
-const Bot = require('../models/bot.model.js'),
-  botController = require('./bot.controller.js');
-
-const MessageParams = {
- MaxCharacters: 280,
- PossibleAnswersNumber: 100, 
-};
-
-const _getFilterParams = function () {
-  return '-nc ' + MessageParams.MaxCharacters + ' '
-       + '-nor ' + MessageParams.PossibleAnswersNumber;
-}
+const botController = require('./bot.controller.js');
 
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
 const createConversation = function (topic, members) {
-  const dataArray = [topic, members, _getFilterParams(), 0, (members.length)^2, null, [], []];
+  const dataArray = [topic, members, 0, (members.length)^2, null, [], []];
   _followConversation(dataArray, function (conversation) {
     if (!conversation) {
       console.log('FAILED RUN createConversation');
@@ -28,7 +17,7 @@ const createConversation = function (topic, members) {
 // Accepts an array of data needed for every conversation step.
 // Recursive method that will call itself for each following answer in the thread.
 const _followConversation = function (
-      [topic, members, filterParams, answerIndex, maxAnswers, lastTalker, talkersIndexes, messageArray],
+      [topic, members, answerIndex, maxAnswers, lastTalker, talkersIndexes, messageArray],
       callback) {
   let memberToReply, messageToReply;
   // 1. random talker from list
@@ -42,7 +31,7 @@ const _followConversation = function (
     memberToReply = null;
   }
   // Generate answer
-  _generateAnswer(lastTalker, topic, filterParams, messageToReply, function (err, answer) {
+  _generateAnswer(lastTalker, topic, messageToReply, function (err, answer) {
     if (err) {
       console.log('FAILED RUN _followConversation ' + answerIndex);
     } else {
@@ -56,7 +45,7 @@ const _followConversation = function (
     }
     if (answerIndex < maxAnswers - 1) {
       answerIndex = answerIndex + 1;
-      _followConversation([topic, members, filterParams, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray]);
+      _followConversation([topic, members, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray]);
     } else {
       callback(messageArray);
     };
@@ -82,8 +71,8 @@ const _shouldReplyOrJustAnswer = function (answerIndex, maxAnswers) {
 }
 
 // It accepts the topic about which we want an answer.
-const _generateAnswer = function (botId, topic, filterParams) {
-  botController.answerThread(botId, topic, filterParams, function (err, answer) {
+const _generateAnswer = function (botId, topic) {
+  botController.answerThread(botId, topic, function (err, answer) {
     if (err) {
       console.log('FAILED RUN _generateAnswer ' + botId);
       callback(null);

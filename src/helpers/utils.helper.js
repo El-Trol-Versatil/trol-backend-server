@@ -2,26 +2,54 @@ const generateId = function() {
   return Math.floor(Math.random() * (9999999999 - 1000000000)) + 1000000000;
 }
 
-const roundedRandomNumber = function(min, max) {
-  return Math.floor(Math.random() * (max - min)) + max;
+const randomIntegerInInterval = function(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-const randomStrings = function(stringArray) {
-  const minArraySize = Math.ceil(stringArray.length * 0.60),
-    maxArraySize = Math.floor(stringArray.length * 0.90),
-    numberOfElements = roundedRandomNumber(minArraySize, maxArraySize),
-    finalValues = stringArray.slice();
-  for (let index = 0; index < stringArray.length - numberOfElements; index++) {
-    const randomIndex = roundedRandomNumber(0, numberOfElements - index);
-    finalValues.splice(randomIndex, 1);
+const getIntervalPortion = function (value, min, max) {
+  return (value - min) / (max - min);
+}
+
+const randomElementFromArray = function(array) {
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
+}
+
+const splitRandomlyByCoef = function (sourceArray, portion, finalArray1, finalArray2) {
+  const shuffledArray = _shuffleArray(sourceArray.slice()),
+    integerPortion = Math.round(portion * shuffledArray.length);
+  shuffledArray.forEach(element, index => {
+    (index < integerPortion)
+    ? finalArray1.push(element)
+    : finalArray2.push(element)
+  });
+}
+
+/**
+ * Using Fisher-Yates Shuffle
+ * @param {*} array 
+ */
+function _shuffleArray(array) {
+  let temporaryValue, randomIndex,
+    currentIndex = array.length;
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
   }
-  return finalValues;
+  return array;
 }
 
 const utilsHelper = {
   generateId,
-  roundedRandomNumber,
-  randomStrings,
+  randomIntegerInInterval,
+  randomElementFromArray,
+  getIntervalPortion,
+  splitRandomlyByCoef,
 };
 
 module.exports = utilsHelper;
