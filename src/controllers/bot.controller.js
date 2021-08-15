@@ -40,34 +40,41 @@ const _followBotCreation = function(botList, botIndex, totalBots, params, callba
   });
 }
 
-const _getRandomParams = function(params, callback) {
+const _getRandomParams = function(params) {
   // // // TODO: HILAR FINO - do not override, use real values input
   params = {
-    ageInterval: { values: [18, 55] },
-    culturalLevel: { values: [0, 2] },
-    keywords: { values: ['Tokio', 'La Casa de Papel', 'El Árbol De La Sangre'] },
-    likes: { values: ['Real Madrid', 'Beethoven', 'Miel'] },
-    dislikes: { values: ['Barcelona', 'Mozart', 'Jalea'] },
+    ageInterval: { values: {lower: 18, upper: 55} },
+    genders: { values: ['1', '2'] },
+    ethnicity: { values: ['2', '3'] },
+    culturalLevel: { values: {lower: 0, upper: 2} },
+    moodLevel: { values: {lower: -2, upper: 2} },
+    keywords: { values: ['música', 'medios de transporte', 'fútbol', 'comida', 'política', 'viajes'] },
+    likes: { values: ['Beethoven', 'carne', 'Real Madrid', 'coches', 'derecha', 'playa'] },
+    dislikes: { values: ['Mozart', 'pescado', 'Barcelona', 'motos', 'izquierda', 'montaña'] },
+    interactionLevel: { values: {lower: 2, upper: 3} },
   };
   // // //
 
-  const fieldsToRandomize = [
-    // 'genders',
-    'ageInterval',
-    // 'ethnicity',
-    'culturalLevel',
-    'keywords',
-    'likes',
-    'dislikes',
-  ], randomParams = {};
-  fieldsToRandomize.forEach(field => {
-    const values = params[field].values,
-      randomResults = values[0] instanceof String
-      ? Utils.randomStrings(values)
-      : Utils.roundedRandomNumber(values.lower, values.upper)
-    randomParams[field] = randomResults;
-  });
-  return randomParams;
+  const moodLevel = Utils.randomIntegerInInterval(params.moodLevel.values.lower, params.moodLevel.values.upper),
+    moodCoef = Utils.getIntervalPortion(moodLevel, params.moodLevel.values.lower, params.moodLevel.values.upper),
+    kwToLikes = [], kwToDislikes = [], finalLikes = [], finalDislikes = [];
+  // Will split keywords into likes and dislikes proportionally to mood level.
+  // Will calculate final likes and dislikes by extending them with these values.
+  Utils.splitRandomlyByCoef(params.keywords.values, moodCoef, kwToLikes, kwToDislikes);
+  // Will calculate final likes by getting a portion of likes and kwToLikes. We ignore the remaining elements.
+  Utils.splitRandomlyByCoef([...params.likes.values, ...kwToLikes], moodCoef, finalLikes, []);
+  // Will calculate final dislikes by getting a portion of dislikes and kwToDislikes. We ignore the remaining elements.
+  Utils.splitRandomlyByCoef([...params.dislikes.values, ...kwToDislikes], 1 - moodCoef, finalDislikes, []);
+
+  return randomParams = {
+    age: Utils.randomIntegerInInterval(params.ageInterval.values.lower, params.ageInterval.values.upper),
+    gender: Utils.randomElementFromArray(params.genders.values),
+    ethnicity: Utils.randomElementFromArray(params.ethnicity.values),
+    culturalLevel: Utils.randomIntegerInInterval(params.culturalLevel.values.lower, params.culturalLevel.values.upper),
+    interactionLevel: Utils.randomIntegerInInterval(params.interactionLevel.values.lower, params.interactionLevel.values.upper),
+    likes: finalLikes,
+    dislikes: finalDislikes,
+  };
 }
 
 //RUN - Train a given bot
@@ -158,13 +165,14 @@ const _teachBot = function(id, modelDescriptorList, callback) {
 };
 
 //RUN - Ask a bot for a conversation message
-const answerThread = function(botId, thread, filterParams, messageToReply, callback) {
+const answerThread = function(botId, thread, messageToReply, callback) {
   _getBotFromDB(botId, function (bot) {
     if (!bot) {
       console.log('FAILED RUN answerThread no bot in DB with id ' + botId);
       callback(err, null);
     } else {
-      Python.answerThread(bot.AIObject, thread, filterParams, messageToReply, function (err, answer) {
+      const botFilterParams = _getFilterParams(bot.properties.interactionLevel);
+      Python.answerThread(bot.AIObject, thread, botFilterParams, messageToReply, function (err, answer) {
         if (err) {
           console.log('FAILED RUN answerThread ' + botId);
           callback(err, null);
@@ -176,6 +184,19 @@ const answerThread = function(botId, thread, filterParams, messageToReply, callb
     }
   });
 }
+
+const MessageParams = {
+  MaxInteractionLevel: 5,
+  MaxCharacters: 280,
+  PossibleAnswersNumber: 100, 
+ };
+ 
+ const _getFilterParams = function (interactionLevel) {
+   return '-nc '
+        + Math.round(MessageParams.MaxCharacters * (interactionLevel / MessageParams.MaxInteractionLevel))
+        + ' '
+        + '-nor ' + MessageParams.PossibleAnswersNumber;
+ }
 
 const botController = {
   createBotArray,

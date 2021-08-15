@@ -15,12 +15,16 @@ const TrollnetSchema = mongoose.Schema({
                       required: true },
   keywords:         { type: mongoose.Schema.Types.Mixed,
                       required: true },
+  likes:            { type: mongoose.Schema.Types.Mixed,
+                      required: true },
+  dislikes:         { type: mongoose.Schema.Types.Mixed,
+                      required: true },
   netsize:          { type: mongoose.Schema.Types.Mixed,
                       required: true },
   interactionLevel: { type: mongoose.Schema.Types.Mixed,
                       required: true },
-  targetSelection:  { type: mongoose.Schema.Types.Mixed,
-                      required: true },
+  // targetSelection:  { type: mongoose.Schema.Types.Mixed,
+  //                     required: true },
 });
 
 module.exports = mongoose.model('Trollnet', TrollnetSchema);
