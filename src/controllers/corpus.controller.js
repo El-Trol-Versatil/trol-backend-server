@@ -2,8 +2,8 @@ const FileSystem = require('../providers/filesystem/filesystem.service.js'),
   Corpus = require('../models/corpus.model.js'),
   Utils = require('../helpers/utils.helper.js');
 
-  const corpusesFolder = String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\rawCorpus`,
-  avoidSubPath = String.raw`C:\Users\adminucm\Desktop\etv-backend\trol-backend-server\pythonETV\rawCorpus\tokenizedRawCorpus`;
+  const corpusesFolder = String.raw`D:\Proyectos\etv-tfg\ETV-models-and-bots\ETV\rawCorpus`,
+  avoidSubPath = String.raw`D:\Proyectos\etv-tfg\ETV-models-and-bots\ETV\rawCorpus\tokenizedRawCorpus`;
 
 const _filterFileName = function(filePath) {
   const stringArray = filePath.split(corpusesFolder),
@@ -25,7 +25,7 @@ const corpusDaemon = function () {
 
 const _createCorpus = function(path, callback) {
   const generatedId = Utils.generateId(),
-  fileName = _filterFileName(path);
+    fileName = _filterFileName(path);
   let newCorpus = new Corpus({
     id: 'corpus' + generatedId,
     fileName: fileName,

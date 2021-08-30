@@ -79,10 +79,10 @@ const _getRandomParams = function(params) {
 
 //RUN - Train a given bot
 const _createBot = function(params, callback) {
-  const generatedId = Utils.generateId();
+  const generatedId = 'bot' + Utils.generateId();
   Python.createBot(
     params.age,
-    params.educationLevel,
+    params.culturalLevel,
     params.likes,
     params.dislikes, function (err, answer) {
     if (err) {
@@ -90,10 +90,10 @@ const _createBot = function(params, callback) {
       callback(err, null);
     } else {
       let newBot = new Bot({
-        id: 'bot' + generatedId,
+        id: generatedId,
         botName: 'Name' + generatedId,
         creationDate: new Date(),
-        botObject: answer,
+        AIObject: answer,
         properties: params,
       });
       newBot.save(function (err, bot) {
@@ -134,14 +134,14 @@ const _followBotTeaching = function(botList, botIndex, totalBots, modelDescripto
 
 //RUN - Teach a given bot about what he likes and dislikes
 const _teachBot = function(id, modelDescriptorList, callback) {
-  _getBotFromDB(botId, function (bot) {
+  _getBotFromDB(id, function (bot) {
     if (!bot) {
-      callback(err);
       console.log('FAILED RUN _teachBot no bot in DB with id ' + id);
+      callback(err);
     } else {
       Python.teachBot(bot.AIObject, modelDescriptorList, function (err, answer) {
         if (err) {
-          console.log('FAILED RUN _teachBot ' + id + ' in ' + model.topic);
+          console.log('FAILED RUN _teachBot ' + id);
           callback(err);
         } else {
           Bot.update({ id }, {
@@ -151,10 +151,10 @@ const _teachBot = function(id, modelDescriptorList, callback) {
             }
           }, function (err) {
             if (err) {
-              console.log('FAILED RUN _teachBot ' + id + ' in ' + model.topic);
+              console.log('FAILED RUN _teachBot ' + id);
               callback(err);
             } else {
-              console.log('SUCCESS RUN _teachBot ' + id + ' in ' + model.topic);
+              console.log('SUCCESS RUN _teachBot ' + id);
               callback(null);
             }
           });
@@ -192,10 +192,12 @@ const MessageParams = {
  };
  
  const _getFilterParams = function (interactionLevel) {
-   return '-nc '
-        + Math.round(MessageParams.MaxCharacters * (interactionLevel / MessageParams.MaxInteractionLevel))
-        + ' '
-        + '-nor ' + MessageParams.PossibleAnswersNumber;
+   return [
+      '-nc',
+      Math.round(MessageParams.MaxCharacters * (interactionLevel / MessageParams.MaxInteractionLevel)),
+      '-nor',
+      MessageParams.PossibleAnswersNumber
+   ];
  }
 
 const botController = {

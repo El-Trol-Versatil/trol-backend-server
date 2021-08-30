@@ -9,7 +9,7 @@ let trollnetsWaitingForTraining = [];
 
 const trollnetDaemon = function () {
   console.log('Starting trollnetDaemon...');
-  _checkUntrainedTrollnets();
+  setTimeout(_checkUntrainedTrollnets, DAEMON_INTERVAL_TIME);
 }
 
 //GET - Return all trollnets in the DB
@@ -161,11 +161,11 @@ const deactivateTrollnet = function (req, res) {
 const _launchTrollnetConversation = function(netId) {
   Trollnet.findOne({ id: netId }, function (err, trollnet) {
     if (!err) {
-
+      const participatingTrollnet = trollnet.toObject();
       // TODO: HILAR FINO - TOPIC??
       const topic = '';
 
-      threadController.createConversation(trollnet.topic, trollnet.botList);
+      threadController.createConversation(topic, participatingTrollnet.botList);
     }
   });
 };
@@ -187,6 +187,7 @@ const _checkUntrainedTrollnets = function() {
 };
 
 const _launchSetOfTraining = function (untrainedTrollnets) {
+  trollnetsWaitingForTraining = [];
   _trainTrollnetsOneByOne(untrainedTrollnets, 0, [], function() {
   // When all nets have been trained, wait a small time to:
   setTimeout(_launchSetOfTraining, DAEMON_INTERVAL_TIME, trollnetsWaitingForTraining);

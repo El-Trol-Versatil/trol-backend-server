@@ -3,7 +3,7 @@ const botController = require('./bot.controller.js');
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
 const createConversation = function (topic, members) {
-  const dataArray = [topic, members, 0, (members.length)^2, null, [], []];
+  const dataArray = [topic, members, 0, Math.pow(members.length, 2), null, [], []];
   _followConversation(dataArray, function (conversation) {
     if (!conversation) {
       console.log('FAILED RUN createConversation');
@@ -71,14 +71,14 @@ const _shouldReplyOrJustAnswer = function (answerIndex, maxAnswers) {
 }
 
 // It accepts the topic about which we want an answer.
-const _generateAnswer = function (botId, topic) {
-  botController.answerThread(botId, topic, function (err, answer) {
+const _generateAnswer = function (botId, topic, messageToReply, callback) {
+  botController.answerThread(botId, topic, messageToReply, function (err, answer) {
     if (err) {
       console.log('FAILED RUN _generateAnswer ' + botId);
-      callback(null);
+      callback(err, null);
     } else {
       console.log('SUCCESS RUN _generateAnswer ' + botId);
-      callback(answer);
+      callback(null, answer);
     }
   });
 }

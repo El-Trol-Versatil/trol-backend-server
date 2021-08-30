@@ -18,7 +18,7 @@ const randomElementFromArray = function(array) {
 const splitRandomlyByCoef = function (sourceArray, portion, finalArray1, finalArray2) {
   const shuffledArray = _shuffleArray(sourceArray.slice()),
     integerPortion = Math.round(portion * shuffledArray.length);
-  shuffledArray.forEach(element, index => {
+  shuffledArray.forEach((element, index) => {
     (index < integerPortion)
     ? finalArray1.push(element)
     : finalArray2.push(element)

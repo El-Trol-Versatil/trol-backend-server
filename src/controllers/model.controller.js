@@ -13,7 +13,7 @@ const modelDaemon = function () {
 const _checkPendingCorpuses = function() {
   console.log('...Interval call... _checkPendingCorpuses');
   CorpusController.getAllNewCorpuses(function(corpusArray) {
-    if (corpusArray) {
+    if (corpusArray && corpusArray.length) {
       _followCorpusTraining(corpusArray, 0, corpusArray.length, function () {
         console.log('SUCCESS RUN _checkPendingCorpuses');
       });
