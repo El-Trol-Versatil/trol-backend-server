@@ -11,7 +11,8 @@ const _filterFileName = function(filePath) {
   return splitRelativePath[1];
 }
 
-const corpusDaemon = function () {
+const startCorpusDaemon = function () {
+  console.log('startCorpusDaemon...');
   FileSystem.onNewFileAdded(corpusesFolder, avoidSubPath, function(corpusPath) {
     _createCorpus(corpusPath, function(err) {
       if (err) {
@@ -67,7 +68,7 @@ const markAsUsed = function(id, callback) {
 };
 
 const corpusController = {
-  corpusDaemon,
+  startCorpusDaemon,
   getAllNewCorpuses,
   markAsUsed,
 };

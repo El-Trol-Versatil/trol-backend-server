@@ -1,15 +1,28 @@
-const botController = require('./bot.controller.js');
+const botController = require('./bot.controller.js'),
+  Conversation = require('../models/conversation.model.js');
+
 
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
-const createConversation = function (topic, members) {
+const createConversation = function (netId, topic, members) {
   const dataArray = [topic, members, 0, Math.pow(members.length, 2), null, [], []];
   _followConversation(dataArray, function (conversation) {
     if (!conversation) {
       console.log('FAILED RUN createConversation');
     } else {
-      console.log('SUCCESS RUN createConversation');
-      callback(conversation);
+      let createdConversation = new Conversation({
+        trollnetId: netId,
+        creationDate: new Date(),
+        topic: topic,
+        conversation: conversation,
+      });
+      createdConversation.save(function (err) {
+        if (err) {
+          console.log('FAILED RUN createConversation ' + topic);
+        } else {
+          console.log('SUCCESS RUN createConversation ' + topic);
+        }
+      });
     }
   });
 }
@@ -25,13 +38,15 @@ const _followConversation = function (
   // 2. answer or reply?
   if (_shouldReplyOrJustAnswer(answerIndex, maxAnswers)) {
 
-    memberToReply = _getRandomDifferentMember(members, lastTalker);
-    messageToReply = messageArray[messageArray.length - 1];
+    memberToReply = _getRandomDifferentMember(talkersIndexes, lastTalker);
+    messageToReply = _getLastMessageFrom(memberToReply, messageArray);
   } else {
     memberToReply = null;
+    messageToReply = topic;
   }
-  // Generate answer
-  _generateAnswer(lastTalker, topic, messageToReply, function (err, answer) {
+  // 3. Generate answer
+  console.log('_followConversation ' + lastTalker + ' is thinking an answer...');
+  botController.answerThread(lastTalker, messageToReply, function (err, answer) {
     if (err) {
       console.log('FAILED RUN _followConversation ' + answerIndex);
     } else {
@@ -41,11 +56,12 @@ const _followConversation = function (
         to: memberToReply,
         content: answer,
       });
+      console.log('_followConversation ' + lastTalker + ' said to ' + (memberToReply || 'everyone') + ': ' + answer);
       _saveLastTalker(talkersIndexes, lastTalker);
     }
     if (answerIndex < maxAnswers - 1) {
       answerIndex = answerIndex + 1;
-      _followConversation([topic, members, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray]);
+      _followConversation([topic, members, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray], callback);
     } else {
       callback(messageArray);
     };
@@ -70,17 +86,12 @@ const _shouldReplyOrJustAnswer = function (answerIndex, maxAnswers) {
   return willReply = Math.random() < replyChance;
 }
 
-// It accepts the topic about which we want an answer.
-const _generateAnswer = function (botId, topic, messageToReply, callback) {
-  botController.answerThread(botId, topic, messageToReply, function (err, answer) {
-    if (err) {
-      console.log('FAILED RUN _generateAnswer ' + botId);
-      callback(err, null);
-    } else {
-      console.log('SUCCESS RUN _generateAnswer ' + botId);
-      callback(null, answer);
-    }
+const _getLastMessageFrom = function (member, conversation) {
+  let message;
+  conversation.forEach(element => {
+    
   });
+  return message;
 }
 
 // Save last talker as last in queue order.

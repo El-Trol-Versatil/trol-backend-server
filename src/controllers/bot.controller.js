@@ -3,6 +3,12 @@ const Bot = require('../models/bot.model.js'),
   Python = require('../providers/scripts/python.service.js'),
   Utils = require('../helpers/utils.helper.js');
 
+  const MessageParams = {
+    MaxInteractionLevel: 5,
+    MaxCharacters: 280,
+    PossibleAnswersNumber: 20, 
+   };
+
 const _getBotFromDB = function(id, callback) {
   Bot.findOne({ id: id }, function (err, bot) {
     if (err) {
@@ -41,20 +47,6 @@ const _followBotCreation = function(botList, botIndex, totalBots, params, callba
 }
 
 const _getRandomParams = function(params) {
-  // // // TODO: HILAR FINO - do not override, use real values input
-  params = {
-    ageInterval: { values: {lower: 18, upper: 55} },
-    genders: { values: ['1', '2'] },
-    ethnicity: { values: ['2', '3'] },
-    culturalLevel: { values: {lower: 0, upper: 2} },
-    moodLevel: { values: {lower: -2, upper: 2} },
-    keywords: { values: ['música', 'medios de transporte', 'fútbol', 'comida', 'política', 'viajes'] },
-    likes: { values: ['Beethoven', 'carne', 'Real Madrid', 'coches', 'derecha', 'playa'] },
-    dislikes: { values: ['Mozart', 'pescado', 'Barcelona', 'motos', 'izquierda', 'montaña'] },
-    interactionLevel: { values: {lower: 2, upper: 3} },
-  };
-  // // //
-
   const moodLevel = Utils.randomIntegerInInterval(params.moodLevel.values.lower, params.moodLevel.values.upper),
     moodCoef = Utils.getIntervalPortion(moodLevel, params.moodLevel.values.lower, params.moodLevel.values.upper),
     kwToLikes = [], kwToDislikes = [], finalLikes = [], finalDislikes = [];
@@ -165,14 +157,14 @@ const _teachBot = function(id, modelDescriptorList, callback) {
 };
 
 //RUN - Ask a bot for a conversation message
-const answerThread = function(botId, thread, messageToReply, callback) {
+const answerThread = function(botId, messageToReply, callback) {
   _getBotFromDB(botId, function (bot) {
     if (!bot) {
       console.log('FAILED RUN answerThread no bot in DB with id ' + botId);
       callback(err, null);
     } else {
       const botFilterParams = _getFilterParams(bot.properties.interactionLevel);
-      Python.answerThread(bot.AIObject, thread, botFilterParams, messageToReply, function (err, answer) {
+      Python.answerThread(bot.AIObject, messageToReply, botFilterParams, function (err, answer) {
         if (err) {
           console.log('FAILED RUN answerThread ' + botId);
           callback(err, null);
@@ -184,17 +176,11 @@ const answerThread = function(botId, thread, messageToReply, callback) {
     }
   });
 }
-
-const MessageParams = {
-  MaxInteractionLevel: 5,
-  MaxCharacters: 280,
-  PossibleAnswersNumber: 100, 
- };
  
  const _getFilterParams = function (interactionLevel) {
    return [
       '-nc',
-      Math.round(MessageParams.MaxCharacters * (interactionLevel / MessageParams.MaxInteractionLevel)),
+      Math.round(MessageParams.MaxCharacters * Math.max(2/5, (interactionLevel / MessageParams.MaxInteractionLevel))),
       '-nor',
       MessageParams.PossibleAnswersNumber
    ];

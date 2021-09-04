@@ -14,9 +14,9 @@ const setupCoreMonitors = function () {
 
 const _releaseDaemons = function () {
   console.log('CORE _releaseDaemons');
-  trollnetController.trollnetDaemon();
-  corpusController.corpusDaemon();
-  modelController.modelDaemon();
+  trollnetController.startTrollnetDaemon();
+  corpusController.startCorpusDaemon();
+  modelController.startModelDaemon();
 }
 
 const coreController = {
