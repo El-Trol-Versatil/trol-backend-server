@@ -27,4 +27,4 @@ const TrollnetSchema = mongoose.Schema({
   //                     required: true },
 });
 
-module.exports = mongoose.model('Trollnet', TrollnetSchema);
+module.exports = mongoose.model('TrollnetDraft', TrollnetSchema);

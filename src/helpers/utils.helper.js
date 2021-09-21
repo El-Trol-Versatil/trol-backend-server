@@ -18,7 +18,7 @@ const randomElementFromArray = function(array) {
 const splitRandomlyByCoef = function (sourceArray, portion, finalArray1, finalArray2) {
   const shuffledArray = _shuffleArray(sourceArray.slice()),
     integerPortion = Math.round(portion * shuffledArray.length);
-  shuffledArray.forEach(element, index => {
+  shuffledArray.forEach((element, index) => {
     (index < integerPortion)
     ? finalArray1.push(element)
     : finalArray2.push(element)
@@ -44,12 +44,33 @@ function _shuffleArray(array) {
   return array;
 }
 
+function stringToAscii(stringCoded) {
+  let output = '';
+  stringCoded.split('').forEach((char, index) => {
+    output += char.charCodeAt(0);
+    if (index !== stringCoded.length - 1) {
+      output += ' ';
+    }
+  });
+  return output;
+}
+
+function asciiToString(asciiCoded) {
+  let output = '';
+  asciiCoded.split(' ').forEach(code => {
+    output += String.fromCharCode(code);
+  });
+  return output;
+}
+
 const utilsHelper = {
   generateId,
   randomIntegerInInterval,
   randomElementFromArray,
   getIntervalPortion,
   splitRandomlyByCoef,
+  stringToAscii,
+  asciiToString,
 };
 
 module.exports = utilsHelper;
