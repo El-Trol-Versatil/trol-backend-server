@@ -16,10 +16,10 @@ var chokidar = require('chokidar'),
 const scanFolder = function(folder, callback) {
   fs.readdir(folder, function (err, files) {
     if (err) {
-      console.log('FAILED RUN scanFolder path ' + folder);
+      console.log('FAILED scanFolder path ' + folder);
       callback(err);
     } else {
-      console.log('SUCCESS RUN scanFolder path ' + folder);
+      console.log('SUCCESS scanFolder path ' + folder);
       callback(files);
     }
   });
@@ -28,11 +28,10 @@ const scanFolder = function(folder, callback) {
 // for scanning folder file changes:
 // testFolder = './tests/';
 const onNewFileAdded = function(folder, avoidFolder, callback) {
-  console.log('fileSystemService onNewFileAdded LISTENING for path', folder);
+  console.log('FilySystem listening path: ' + folder);
   const watcher = chokidar.watch(folder, {ignored: avoidFolder, persistent: true});
   watcher
     .on('add', function(path) {
-      console.log('File', path, 'has been added');
       callback(path);
     })
 }

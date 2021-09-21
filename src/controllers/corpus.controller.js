@@ -12,13 +12,12 @@ const _filterFileName = function(filePath) {
 }
 
 const startCorpusDaemon = function () {
-  console.log('startCorpusDaemon...');
   FileSystem.onNewFileAdded(corpusesFolder, avoidSubPath, function(corpusPath) {
     _createCorpus(corpusPath, function(err) {
       if (err) {
-        console.log('FAILED RUN onNewFileAdded path ' + corpusPath);
+        console.log('FAILED onNewFileAdded could not save path ' + corpusPath);
       } else {
-        console.log('SUCCESS RUN onNewFileAdded path ' + corpusPath);
+        console.log('SUCCESS onNewFileAdded saved new corpus ' + corpusPath);
       }
     });
   });
@@ -32,12 +31,11 @@ const _createCorpus = function(path, callback) {
     fileName: fileName,
     isNewCorpus: true,
   });
-  newCorpus.save(function (err, corpus) {
+  newCorpus.save(function (err) {
     if (err) {
-      console.log('FAILED RUN _createCorpus ' + fileName);
+      console.log('FAILED to save _createCorpus ' + fileName);
       callback(err);
     } else {
-      console.log('SUCCESS RUN _createCorpus ' + fileName);
       callback(null);
     }
   });
@@ -46,10 +44,8 @@ const _createCorpus = function(path, callback) {
 const getAllNewCorpuses = function(callback) {
   Corpus.find({ isNewCorpus: true }, '-_id -__v', function (err, corpuses) {
     if (err) {
-      console.log('FAILED GET getAllNewCorpuses');
       callback(null);
     } else {
-      console.log('SUCCESS GET getAllNewCorpuses');
       callback(corpuses);
     }
   });
@@ -58,10 +54,8 @@ const getAllNewCorpuses = function(callback) {
 const markAsUsed = function(id, callback) {
   Corpus.update({ id }, { $set: { isNewCorpus: false } }, function (err) {
     if (err) {
-      console.log('FAILED RUN markAsUsed ' + id);
       callback(err);
     } else {
-      console.log('SUCCESS RUN markAsUsed ' + id);
       callback(null);
     }
   });

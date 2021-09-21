@@ -23,26 +23,36 @@ const _getBotFromDB = function(id, callback) {
 //RUN - Create an array of bots with some parameters
 // Returns the list of ids that identifies all the bots in the array
 const createBotArray = function(params, callback) {
+  console.log('RUNNING createBotArray');
   const botList = [],
     totalBots = params.netsize.value;
-  _followBotCreation(botList, 0, totalBots, params, function () {
-    console.log('SUCCESS RUN createBotArray');
-    callback(null, botList);
+  _followBotCreation(botList, 0, totalBots, params, function (err) {
+    if (err) {
+      console.log('FAILURE createBotArray');
+      callback(err);
+    } else {
+      console.log('SUCCESS createBotArray');
+      callback(null, botList);
+    }
   });
 };
 
 // Recursive method that will call itself for each following bot to be created in the array.
 const _followBotCreation = function(botList, botIndex, totalBots, params, callback) {
   _createBot(_getRandomParams(params), function (err, generatedId) {
-    if (!err) {
-      botList.push(generatedId);
-    }
-    if (botIndex < totalBots - 1) {
-      botIndex = botIndex + 1;
-      _followBotCreation(botList, botIndex, totalBots, params, callback);
+    if (err) {
+      callback(err);
     } else {
-      callback();
-    };
+      if (!err) {
+        botList.push(generatedId);
+      }
+      if (botIndex < totalBots - 1) {
+        botIndex = botIndex + 1;
+        _followBotCreation(botList, botIndex, totalBots, params, callback);
+      } else {
+        callback();
+      };
+    }
   });
 }
 
@@ -72,14 +82,14 @@ const _getRandomParams = function(params) {
 //RUN - Train a given bot
 const _createBot = function(params, callback) {
   const generatedId = 'bot' + Utils.generateId();
+  console.log('RUNNING _createBot ' + generatedId);
   Python.createBot(
     params.age,
     params.culturalLevel,
     params.likes,
     params.dislikes, function (err, answer) {
     if (err) {
-      console.log('FAILED RUN _createBot ' + generatedId);
-      callback(err, null);
+      callback('FAILED _createBot ' + generatedId + ': ' + err, null);
     } else {
       let newBot = new Bot({
         id: generatedId,
@@ -90,10 +100,9 @@ const _createBot = function(params, callback) {
       });
       newBot.save(function (err, bot) {
         if (err) {
-          console.log('FAILED RUN _createBot ' + generatedId);
+          console.log('FAILED to save _createBot ' + generatedId);
           callback(err, null);
         } else {
-          console.log('SUCCESS RUN _createBot ' + generatedId);
           callback(null, generatedId);
         }
       });
@@ -103,10 +112,16 @@ const _createBot = function(params, callback) {
 
 //RUN - Train a given bot
 const teachBotArray = function(botList, callback) {
+  console.log('RUNNING teachBotArray');
   ModelController.getModelDescriptorListFromDB(function (modelDescriptorList) {
-    _followBotTeaching(botList, 0, botList.length, modelDescriptorList, function () {
-      console.log('SUCCESS RUN teachBotArray');
-      callback(null);
+    _followBotTeaching(botList, 0, botList.length, modelDescriptorList, function (err) {
+      if (err) {
+        console.log('FAILURE teachBotArray');
+        callback(err);
+      } else {
+        console.log('SUCCESS teachBotArray');
+        callback(null);
+      }
     });
   });
 };
@@ -115,44 +130,41 @@ const teachBotArray = function(botList, callback) {
 const _followBotTeaching = function(botList, botIndex, totalBots, modelDescriptorList, callback) {
   const botId = botList[botIndex];
   _teachBot(botId, modelDescriptorList, function (err) {
-    if (botIndex < totalBots - 1) {
-      botIndex = botIndex + 1;
-      _followBotTeaching(botList, botIndex, totalBots, modelDescriptorList, callback);
+    if (err) {
+      callback(err);
     } else {
-      callback();
-    };
+      if (botIndex < totalBots - 1) {
+        botIndex = botIndex + 1;
+        _followBotTeaching(botList, botIndex, totalBots, modelDescriptorList, callback);
+      } else {
+        callback();
+      };
+    }
   });
 }
 
 //RUN - Teach a given bot about what he likes and dislikes
 const _teachBot = function(id, modelDescriptorList, callback) {
+  console.log('RUNNING _teachBot ' + id);
   _getBotFromDB(id, function (bot) {
-    if (!bot) {
-      console.log('FAILED RUN _teachBot no bot in DB with id ' + id);
-      callback(err);
-    } else {
-      Python.teachBot(bot.AIObject, modelDescriptorList, function (err, answer) {
-        if (err) {
-          console.log('FAILED RUN _teachBot ' + id);
-          callback(err);
-        } else {
-          Bot.update({ id }, {
-            $set: {
-              lastTrained: new Date(),
-              AIObject: answer
-            }
-          }, function (err) {
-            if (err) {
-              console.log('FAILED RUN _teachBot ' + id);
-              callback(err);
-            } else {
-              console.log('SUCCESS RUN _teachBot ' + id);
-              callback(null);
-            }
-          });
-        }
-      });
-    }
+    Python.teachBot(bot.AIObject, modelDescriptorList, function (err, answer) {
+      if (err) {
+        callback('FAILED teachBot ' + id + ': ' + err);
+      } else {
+        Bot.update({ id }, {
+          $set: {
+            lastTrained: new Date(),
+            AIObject: answer
+          }
+        }, function (err) {
+          if (err) {
+            callback(err);
+          } else {
+            callback(null);
+          }
+        });
+      }
+    });
   });
 };
 
@@ -160,16 +172,13 @@ const _teachBot = function(id, modelDescriptorList, callback) {
 const answerThread = function(botId, messageToReply, callback) {
   _getBotFromDB(botId, function (bot) {
     if (!bot) {
-      console.log('FAILED RUN answerThread no bot in DB with id ' + botId);
       callback(err, null);
     } else {
       const botFilterParams = _getFilterParams(bot.properties.interactionLevel);
       Python.answerThread(bot.AIObject, messageToReply, botFilterParams, function (err, answer) {
         if (err) {
-          console.log('FAILED RUN answerThread ' + botId);
           callback(err, null);
         } else {
-          console.log('SUCCESS RUN answerThread ' + botId);
           callback(null, answer)
         }
       });

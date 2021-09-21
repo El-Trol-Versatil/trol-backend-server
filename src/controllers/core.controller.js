@@ -1,6 +1,5 @@
 const trollnetController = require('./trollnet.controller.js'),
   corpusController = require('./corpus.controller.js'),
-  Python = require('../providers/scripts/python.service.js'),
   modelController = require('./model.controller.js');
 
 const prepareCoreInstances = function () {
@@ -13,7 +12,6 @@ const setupCoreMonitors = function () {
 }
 
 const _releaseDaemons = function () {
-  console.log('CORE _releaseDaemons');
   trollnetController.startTrollnetDaemon();
   corpusController.startCorpusDaemon();
   modelController.startModelDaemon();

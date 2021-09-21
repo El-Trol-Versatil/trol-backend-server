@@ -9,7 +9,7 @@ const FORCE_ASCII_INPUT = '--ascii-in',
 
 const LOG_EXECUTION_ARGUMENTS = false;
 
-const getParamsItem = function(specificParams) {
+const _getParamsItem = function(specificParams) {
   return {
     mode: 'text',
     pythonPath: SERVER_CONFIG.PYTHON_PATH,
@@ -23,10 +23,11 @@ const getParamsItem = function(specificParams) {
 // INPUT: bot params like age, education level, likes and dislikes.
 // OUTPUT: the bot object.
 const createBot = function(age, educationLevel, likes, dislikes, callback) {
-  const params = getParamsItem([PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes]);
-  LOG_EXECUTION_ARGUMENTS && console.log('PYTHON createBot ' + JSON.stringify(params));
+  const params = _getParamsItem([PY_SCRIPTS.CREATE_BOT, age, educationLevel, likes, dislikes]);
+  LOG_EXECUTION_ARGUMENTS && console.log('RUNNING Python.createBot: ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, function(err, textArrayAnswer) {
     if (err) {
+      console.log('FAILED Python.createBot: ' + err);
       callback(err);
     } else {
       LOG_EXECUTION_ARGUMENTS && textArrayAnswer.forEach(element => {
@@ -42,17 +43,16 @@ const createBot = function(age, educationLevel, likes, dislikes, callback) {
 // OUTPUT: a trained model for these options.
 const trainModel = function(modelId, fileName, modelDescriptorList, iterations, callback) {
   const asciiMDL = Utils.stringToAscii(modelDescriptorList);
-  const params = getParamsItem([
+  const params = _getParamsItem([
     PY_SCRIPTS.TRAIN_MODEL, modelId, fileName, asciiMDL, '-n', iterations,
     FORCE_ASCII_INPUT, FORCE_ASCII_OUTPUT
   ]);
-  LOG_EXECUTION_ARGUMENTS && console.log('PYTHON trainModel ' + JSON.stringify(params));
+  LOG_EXECUTION_ARGUMENTS && console.log('RUNNING Python.trainModel: ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, function(err, textArrayAnswer) {
     if (err) {
-      debugger;
+      console.log('FAILED Python.trainModel: ' + err);
       callback(err);
     } else {
-      debugger;
       LOG_EXECUTION_ARGUMENTS && textArrayAnswer.forEach(element => {
         console.log(element);
       });
@@ -68,13 +68,14 @@ const trainModel = function(modelId, fileName, modelDescriptorList, iterations, 
 const teachBot = function(bot, modelDescriptorList, callback) {
   const asciiBot = Utils.stringToAscii(bot);
   const asciiMDL = Utils.stringToAscii(modelDescriptorList);
-  const params = getParamsItem([
+  const params = _getParamsItem([
     PY_SCRIPTS.TEACH_BOT, asciiBot, asciiMDL,
     FORCE_ASCII_INPUT, FORCE_ASCII_OUTPUT
   ]);
-  LOG_EXECUTION_ARGUMENTS && console.log('PYTHON teachBot ' + JSON.stringify(params));
+  LOG_EXECUTION_ARGUMENTS && console.log('RUNNING Python.teachBot: ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, function(err, textArrayAnswer) {
     if (err) {
+      console.log('FAILED Python.teachBot: ' + err);
       callback(err);
     } else {
       LOG_EXECUTION_ARGUMENTS && textArrayAnswer.forEach(element => {
@@ -91,14 +92,14 @@ const teachBot = function(bot, modelDescriptorList, callback) {
 // OUTPUT: the conversation output message.
 const answerThread = function(bot, messageToReply, filterParams, callback) {
   const asciiBot = Utils.stringToAscii(bot);
-  const params = getParamsItem([
+  const params = _getParamsItem([
     PY_SCRIPTS.ANSWER_THREAD, asciiBot, messageToReply, ...filterParams,
     FORCE_ASCII_INPUT
   ]);
-  LOG_EXECUTION_ARGUMENTS && console.log('PYTHON answerThread ' + JSON.stringify(params));
+  LOG_EXECUTION_ARGUMENTS && console.log('RUNNING Python.answerThread: ' + JSON.stringify(params));
   PythonShell.run(COMMON_BASE_SCRIPT, params, function(err, textArrayAnswer) {
     if (err) {
-      console.log('ERROR answerThread: ' + err);
+      console.log('FAILED Python.answerThread: ' + err);
       callback(err);
     } else {
       LOG_EXECUTION_ARGUMENTS && textArrayAnswer.forEach(element => {
@@ -109,25 +110,6 @@ const answerThread = function(bot, messageToReply, filterParams, callback) {
     }
   });
 };
-
-// Necesito crear a Ricardo.
-// A Python le paso la edad, la educación, sus likes y sus dislikes.
-// Python me devuelve el objeto de Ricardo.
-
-// Necesito crear un modelo de 'futbol'.
-// A Python le paso un id para identificar al modelo, la ruta del corpus, el modelDescriptorList y el num de iteraciones.
-// Python me devuelve el model descriptor list actualizado.
-
-// Quiero que Ricardo aprenda más info acerca de lo que le gusta y lo que no le gusta.
-// A python le paso el objeto de ricardo y el model descriptor list.
-// Python me devuelve el objeto json de ricardo actualizado
-
-// Quiero que Ricardo hable de futbol, respuesta sencilla o respuesta a alguien:
-// A python le paso el objeto de Ricardo, hilo en el que Ricardo quiere responder, parámetros de filtrado.
-// Los parámetros de filtrado son máximo de caracteres (-nc 280) y el número de respuestas (-nor 100, cuantas más, más probabilidad de que sea preciso).
-// getResponse "..." "asdbashdbahsd asdhbahsdbahsd " -nc 280 -nor 100
-// [opcionalmente la intervención de a quien tenga que responder iría en el contexto o meteríamos el hilo completo]
-// Python me devuelve el mensaje de Ricardo
 
 const pythonService = {
   createBot,

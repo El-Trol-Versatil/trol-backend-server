@@ -13,6 +13,7 @@ const TrollnetSchema = mongoose.Schema({
   status:      { type: String,
                  required: true },
   lastTrained: { type: Date },
+  error:       { type: String },
 });
 
 module.exports = mongoose.model('Trollnet', TrollnetSchema);

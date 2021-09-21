@@ -5,25 +5,21 @@ const botController = require('./bot.controller.js'),
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
 const createConversation = function (netId, topic, members) {
+  console.log('RUNNING createConversation ' + topic);
   const dataArray = [topic, members, 0, Math.pow(members.length, 2), null, [], []];
   _followConversation(dataArray, function (conversation) {
-    if (!conversation) {
-      console.log('FAILED RUN createConversation');
-    } else {
-      let createdConversation = new Conversation({
-        trollnetId: netId,
-        creationDate: new Date(),
-        topic: topic,
-        conversation: conversation,
-      });
-      createdConversation.save(function (err) {
-        if (err) {
-          console.log('FAILED RUN createConversation ' + topic);
-        } else {
-          console.log('SUCCESS RUN createConversation ' + topic);
-        }
-      });
-    }
+    console.log('FINISHED createConversation ' + topic);
+    let createdConversation = new Conversation({
+      trollnetId: netId,
+      creationDate: new Date(),
+      topic: topic,
+      conversation: conversation,
+    });
+    createdConversation.save(function (err) {
+      if (err) {
+        console.log('FAILED to save conversation ' + topic);
+      }
+    });
   });
 }
 
@@ -39,7 +35,7 @@ const _followConversation = function (
   if (_shouldReplyOrJustAnswer(answerIndex, maxAnswers)) {
 
     memberToReply = _getRandomDifferentMember(talkersIndexes, lastTalker);
-    messageToReply = _getLastMessageFrom(memberToReply, messageArray);
+    messageToReply = _getLastMessageFrom(memberToReply, messageArray) || topic;
   } else {
     memberToReply = null;
     messageToReply = topic;
@@ -48,9 +44,8 @@ const _followConversation = function (
   console.log('_followConversation ' + lastTalker + ' is thinking an answer...');
   botController.answerThread(lastTalker, messageToReply, function (err, answer) {
     if (err) {
-      console.log('FAILED RUN _followConversation ' + answerIndex);
+      console.log('FAILED _followConversation bot could not answer :( ' + answerIndex);
     } else {
-      console.log('SUCCESS RUN _followConversation ' + answerIndex);
       messageArray.push({
         from: lastTalker,
         to: memberToReply,
@@ -76,7 +71,7 @@ const _getRandomDifferentMember = function (members, memberToAvoid) {
     const indexToRemove = list.indexOf(memberToAvoid);
     list.splice(indexToRemove, 1);
   }
-  let randomIndex = Math.trunc(Math.random() * list.length);
+  const randomIndex = Math.trunc(Math.random() * list.length);
   return list[randomIndex];
 }
 
@@ -87,11 +82,15 @@ const _shouldReplyOrJustAnswer = function (answerIndex, maxAnswers) {
 }
 
 const _getLastMessageFrom = function (member, conversation) {
-  let message;
-  conversation.forEach(element => {
-    
+  let possibleMessages = [];
+  conversation.forEach(conversationMessage => {
+    if (conversationMessage.from === member) {
+      possibleMessages.push(conversationMessage);
+    }
   });
-  return message;
+  const randomIndex = Math.trunc(Math.random() * possibleMessages.length);
+  lastMessage = possibleMessages[randomIndex].content;
+  return lastMessage;
 }
 
 // Save last talker as last in queue order.
