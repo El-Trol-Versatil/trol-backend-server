@@ -1,6 +1,8 @@
 const Bot = require('../models/bot.model.js'),
+  BotUser = require('../models/botUser.model.js'),
   ModelController = require('./model.controller.js'),
   Python = require('../providers/scripts/python.service.js'),
+  trollnetHelper = require('../helpers/trollnet.helper.js'),
   Utils = require('../helpers/utils.helper.js');
 
   const MessageParams = {
@@ -22,11 +24,11 @@ const _getBotFromDB = function(id, callback) {
 
 //RUN - Create an array of bots with some parameters
 // Returns the list of ids that identifies all the bots in the array
-const createBotArray = function(params, callback) {
+const createBotArray = function(trollnetId, params, callback) {
   console.log('RUNNING createBotArray');
   const botList = [],
     totalBots = params.netsize.value;
-  _followBotCreation(botList, 0, totalBots, params, function (err) {
+  _followBotCreation(trollnetId, botList, 0, totalBots, params, function (err) {
     if (err) {
       console.log('FAILURE createBotArray');
       callback(err);
@@ -38,7 +40,7 @@ const createBotArray = function(params, callback) {
 };
 
 // Recursive method that will call itself for each following bot to be created in the array.
-const _followBotCreation = function(botList, botIndex, totalBots, params, callback) {
+const _followBotCreation = function(trollnetId, botList, botIndex, totalBots, params, callback) {
   _createBot(_getRandomParams(params), function (err, generatedId) {
     if (err) {
       callback(err);
@@ -46,9 +48,11 @@ const _followBotCreation = function(botList, botIndex, totalBots, params, callba
       if (!err) {
         botList.push(generatedId);
       }
-      if (botIndex < totalBots - 1) {
-        botIndex = botIndex + 1;
-        _followBotCreation(botList, botIndex, totalBots, params, callback);
+      botIndex = botIndex + 1;
+      let percentualProgress = Math.floor((botIndex / totalBots) * 100);
+      trollnetHelper.updateCreationStatus(trollnetId, percentualProgress);
+      if (botIndex < totalBots) {
+        _followBotCreation(trollnetId, botList, botIndex, totalBots, params, callback);
       } else {
         callback();
       };
@@ -111,10 +115,10 @@ const _createBot = function(params, callback) {
 };
 
 //RUN - Train a given bot
-const teachBotArray = function(botList, callback) {
+const teachBotArray = function(trollnetId, botList, callback) {
   console.log('RUNNING teachBotArray');
   ModelController.getModelDescriptorListFromDB(function (modelDescriptorList) {
-    _followBotTeaching(botList, 0, botList.length, modelDescriptorList, function (err) {
+    _followBotTeaching(trollnetId, botList, 0, botList.length, modelDescriptorList, function (err) {
       if (err) {
         console.log('FAILURE teachBotArray');
         callback(err);
@@ -127,15 +131,17 @@ const teachBotArray = function(botList, callback) {
 };
 
 // Recursive method that will call itself for each following bot to be taught in the array.
-const _followBotTeaching = function(botList, botIndex, totalBots, modelDescriptorList, callback) {
+const _followBotTeaching = function(trollnetId, botList, botIndex, totalBots, modelDescriptorList, callback) {
   const botId = botList[botIndex];
   _teachBot(botId, modelDescriptorList, function (err) {
     if (err) {
       callback(err);
     } else {
-      if (botIndex < totalBots - 1) {
-        botIndex = botIndex + 1;
-        _followBotTeaching(botList, botIndex, totalBots, modelDescriptorList, callback);
+      botIndex = botIndex + 1;
+      let percentualProgress = Math.floor((botIndex / totalBots) * 100);
+      trollnetHelper.updateTrainingStatus(trollnetId, percentualProgress);
+      if (botIndex < totalBots) {
+        _followBotTeaching(trollnetId, botList, botIndex, totalBots, modelDescriptorList, callback);
       } else {
         callback();
       };
@@ -168,18 +174,46 @@ const _teachBot = function(id, modelDescriptorList, callback) {
   });
 };
 
+//RUN - Delete an array of bots
+const deleteBotArray = function(botList, callback) {
+  console.log('RUNNING deleteBotArray');
+  Bot.deleteMany({ id: { $in: botList }}, function(err) {
+    if (err) {
+      console.log('FAILURE deleteBotArray');
+      callback(err);
+    } else {
+      BotUser.deleteMany({ botname: { $in: botList }}, function(err) {
+        if (err) {
+          console.log('FAILURE deleteBotArray');
+          callback(err);
+        } else {
+          console.log('SUCCESS deleteBotArray');
+          callback(null);
+        }
+      });
+    }
+  });
+};
+
+
 //RUN - Ask a bot for a conversation message
-const answerThread = function(botId, messageToReply, callback) {
+const answerThread = function(messageToReplyId, messageToReplyContent, botId, callback) {
   _getBotFromDB(botId, function (bot) {
     if (!bot) {
       callback(err, null);
     } else {
       const botFilterParams = _getFilterParams(bot.properties.interactionLevel);
-      Python.answerThread(bot.AIObject, messageToReply, botFilterParams, function (err, answer) {
+      Python.answerThread(bot.AIObject, messageToReplyContent, botFilterParams, function (err, answer) {
         if (err) {
           callback(err, null);
         } else {
-          callback(null, answer)
+          Python.publishMessage(messageToReplyId, answer, botId, function (err, publishId) {
+            if (err) {
+              callback(err, null);
+            } else {
+              callback(null, {content: answer, id: publishId});
+            }
+          });
         }
       });
     }
@@ -198,6 +232,7 @@ const answerThread = function(botId, messageToReply, callback) {
 const botController = {
   createBotArray,
   teachBotArray,
+  deleteBotArray,
   answerThread,
 };
 

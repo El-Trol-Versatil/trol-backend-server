@@ -1,8 +1,10 @@
 const Trollnet = require('../models/trollnet.model.js'),
-  {Training} = require('../constants/trollnet.constants.js'),
+  {CreationStatus, TrainingStatus} = require('../constants/trollnet.constants.js'),
   botController = require('./bot.controller.js'),
-  threadController = require('./thread.controller'),
-  Utils = require('../helpers/utils.helper.js');
+  threadController = require('./thread.controller.js'),
+  {updateCreationStatus, updateTrainingStatus} = require('../helpers/trollnet.helper.js'),
+  Utils = require('../helpers/utils.helper.js'),
+  Python = require('../providers/scripts/python.service.js');
 
 const DAEMON_INTERVAL_TIME = 30000;
 let trollnetsWaitingForTraining = [];
@@ -10,7 +12,7 @@ let trollnetsWaitingForTraining = [];
 const startTrollnetDaemon = function () {
   setTimeout(function() {
     // Check on start if any stored trollnet is untrained
-    Trollnet.find({ status: { $in: [ Training.UNTRAINED, Training.FAILED ] } }, '-_id -__v', function (err, storedTrollnets) {
+    Trollnet.find({ creationStatus: CreationStatus.CREATED, trainingStatus: { $lt: TrainingStatus.TRAINED } }, '-_id -__v', function (err, storedTrollnets) {
       _checkUntrainedTrollnets(storedTrollnets);
     });
   }, DAEMON_INTERVAL_TIME);
@@ -51,54 +53,70 @@ const addTrollnet = function (req, res) {
   let newTrollnet = new Trollnet({
     id: 'trollnet' + generatedId,
     isActive: false,
-    status: Training.UNTRAINED,
+    creationStatus: 1,
+    trainingStatus: 0,
+    botList: [],
     properties: req.body
   });
-  botController.createBotArray(newTrollnet.properties, function (err, botList) {
+  newTrollnet.save(function (err, trollnet) {
     if (err) {
-      console.log('FAILED POST addTrollnet ' + req.body.customName + ': ' + err);
+      console.log('FAILED POST addTrollnet ' + req.body.customName);
       res.status(500).send(err.message);
     } else {
-      newTrollnet.botList = botList;
-      newTrollnet.save(function (err, trollnet) {
-        if (err) {
-          console.log('FAILED POST addTrollnet ' + req.body.customName);
-          res.status(500).send(err.message);
-        } else {
-          _addUntrainedTrollnet(trollnet);
-          const object = trollnet.toObject();
-          delete object._id;
-          delete object.__v;
-          console.log('SUCCESS POST addTrollnet ' + req.body.customName);
-          res.status(200).jsonp(object);
-        }
-      });
+      const object = trollnet.toObject();
+      delete object._id;
+      delete object.__v;
+      console.log('SUCCESS POST addTrollnet ' + req.body.customName);
+      res.status(200).jsonp(object);
+      _createTrollnetBots(newTrollnet);
     }
   });
-};
+}
 
 //DELETE - Delete a trollnet with specified ID
 const deleteTrollnet = function (req, res) {
-  Trollnet.deleteOne({ id: req.params.id }, function (err) {
+  Trollnet.findOneAndRemove({ id: req.params.id }, function (err, trollnet) {
+    botController.deleteBotArray(trollnet.botList, function (err) {
+      if (err) {
+        console.log('FAILED DELETE deleteTrollnet ' + req.params.id);
+        res.status(500).send(err.message);
+      } else {
+        console.log('SUCCESS DELETE deleteTrollnet ' + req.params.id);
+        res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + ' deleted sucessfully' });
+      }
+    });
+  });
+};
+
+//POST - Return the status of a list of trollnets
+const getUntrainedTrollnetsStatus = function (req, res) {
+  Trollnet.find({ id: { $in: req.body.untrainedIdList } }, '-_id -__v', function (err, storedTrollnets) {
     if (err) {
-      console.log('FAILED DELETE deleteTrollnet ' + req.params.id);
+      console.log('FAILED GET getUntrainedTrollnetsStatus');
       res.status(500).send(err.message);
     } else {
-      console.log('SUCCESS DELETE deleteTrollnet ' + req.params.id);
-      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + ' deleted sucessfully' });
+      const mappedTrollnets = storedTrollnets.map(function(trollnet) {
+        return {
+          id: trollnet.id,
+          creationStatus: trollnet.creationStatus,
+          trainingStatus: trollnet.trainingStatus
+        };
+     });
+      console.log('SUCCESS GET getUntrainedTrollnetsStatus');
+      res.status(200).jsonp(mappedTrollnets);
     }
   });
 };
 
 //PUT '/rename/:id' - Rename a trollnet with specified ID
 const renameTrollnet = function (req, res) {
-  Trollnet.update({ id: req.params.id }, { $set: { properties: { customName: req.body.newName } } }, function (err) {
+  Trollnet.update({ id: req.params.id }, { $set: { 'properties.customName': req.body.newName } }, function (err) {
     if (err) {
       console.log('FAILED PUT renameTrollnet ' + req.params.id);
       res.status(500).send(err.message);
     } else {
       console.log('SUCCESS PUT renameTrollnet ' + req.params.id);
-      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + 'renamed sucessfully' });
+      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + ' renamed sucessfully' });
     }
   })
 };
@@ -111,8 +129,8 @@ const activateTrollnet = function (req, res) {
       res.status(500).send(err.message);
     } else {
       console.log('SUCCESS PUT activateTrollnet ' + req.params.id);
-      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + 'activated sucessfully' });
-      _launchTrollnetConversation(req.params.id, req.body.mainThread || 'Hello world');
+      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + ' activated sucessfully' });
+      _prepareTrollnetConversation(req.params.id, req.body.targetAccount);
     }
   })
 };
@@ -125,22 +143,9 @@ const deactivateTrollnet = function (req, res) {
       res.status(500).send(err.message);
     } else {
       console.log('SUCCESS PUT deactivateTrollnet ' + req.params.id);
-      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + 'deactivated sucessfully' });
+      res.status(200).jsonp({ message: 'Trollnet ' + req.params.id + ' deactivated sucessfully' });
     }
   })
-};
-
-const _launchTrollnetConversation = function(netId, topic) {
-  Trollnet.findOne({ id: netId }, function (err, trollnet) {
-    if (!err) {
-      const participatingTrollnet = trollnet.toObject();
-      threadController.createConversation(netId, topic, participatingTrollnet.botList);
-    }
-  });
-};
-
-const _addUntrainedTrollnet = function(trollnet) {
-  trollnetsWaitingForTraining.push(trollnet);
 };
 
 // Check periodically if any is waiting for training.
@@ -185,28 +190,74 @@ const _followTrollnetTraining = function(trollnets, index, failedTrainings, fina
 //RUN -Teach all the bots of the trollnet in what they like/dislike
 const _teachTrollnet = function(netId, callback) {
   console.log('RUNNING _teachTrollnet ' + netId);
-  Trollnet.update({ id: netId }, { $set: { status: Training.IN_PROGRESS } }, () => {});
+  updateTrainingStatus(netId, 1);
   Trollnet.findOne({ id: netId }, function (err, trollnet) {
     const object = trollnet.toObject();
-    botController.teachBotArray(object.botList, function (err) {
+    botController.teachBotArray(netId, object.botList, function (err) {
       if (err) {
         console.log('FAILED _teachTrollnet ' + netId + ': ' + err);
-        Trollnet.update({ id: netId }, { $set: { status: Training.FAILED, error: err } }, () => {});
+        updateTrainingStatus(netId, TrainingStatus.FAILED, err);
         callback(err);
       } else {
         console.log('SUCCESS _teachTrollnet ' + netId);
-        Trollnet.update({ id: netId }, { $set: { status: Training.READY, error: null } }, function (err) {
-          if (err) {
-            console.log('FAILED to save _teachTrollnet READY ' + netId);
-            callback(err);
-          } else {
-            callback(null);
-          }
-        })
+        updateTrainingStatus(netId, TrainingStatus.TRAINED);
+        callback(null);
       }
     });
   });
 };
+
+const _createTrollnetBots = function (trollnet) {
+  botController.createBotArray(trollnet.id, trollnet.properties, function (err, botList) {
+    if (err) {
+      console.log('FAILED createBotArray ' + trollnet.id + ': ' + err);
+      updateCreationStatus(trollnet.id, CreationStatus.FAILED, err);
+    } else {
+      Trollnet.update({ id: trollnet.id }, { $set: { botList } }, function (err) {});
+      Python.linkAccountsToBots(botList, function(err, assignedBots) {
+        if (err) {
+          console.log('FAILED linkAccountsToBots ' + trollnet.id + ': ' + err);
+          updateCreationStatus(trollnet.id, CreationStatus.FAILED, err);
+        } else {
+          updateCreationStatus(trollnet.id, CreationStatus.CREATED);
+          _addUntrainedTrollnet(trollnet);
+        }
+      });
+    }
+  });
+};
+
+const _addUntrainedTrollnet = function(trollnet) {
+  if (trollnetsWaitingForTraining.indexOf(trollnet) === -1) {
+    trollnetsWaitingForTraining.push(trollnet);
+  }
+};
+
+const _prepareTrollnetConversation = function(netId, twitterAccountId) {
+  _listenToTwitterAccount(twitterAccountId, function (messageId, messageContent) {
+    if (messageId) {
+      // TODO: should find trollnet this be done after or before we receive the tweet
+      Trollnet.findOne({ id: netId }, function (err, trollnet) {
+        if (!err) {
+          const participatingTrollnet = trollnet.toObject();
+          threadController.createConversation(netId, messageContent, messageId, participatingTrollnet.botList);
+        }
+      });
+    }
+  });
+};
+
+const _listenToTwitterAccount = function(twitterAccountId, callback) {
+  Python.listenToTwitterAccount(twitterAccountId, function(err, messageId, messageContent) {
+    if (err) {
+      console.log('FAILED _listenToTwitterAccount');
+      callback();
+    } else {
+      callback(messageId, messageContent);
+    }
+  });
+};
+
 
 const trollnetController = {
   startTrollnetDaemon,
@@ -214,9 +265,10 @@ const trollnetController = {
   getTrollnetById,
   addTrollnet,
   deleteTrollnet,
+  getUntrainedTrollnetsStatus,
   renameTrollnet,
   activateTrollnet,
-  deactivateTrollnet
+  deactivateTrollnet,
 };
 
 module.exports = trollnetController;

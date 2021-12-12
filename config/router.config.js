@@ -7,6 +7,7 @@ const ROUTER_CONFIG = {
   EP_TROLLNET: {
     BASE:    '',
     BY_ID:   '/:id',
+    STATUS:  '/status',
     RENAME:  '/rename/:id',
     ACTIVATE: '/activate/:id',
     DEACTIVATE: '/deactivate/:id',
