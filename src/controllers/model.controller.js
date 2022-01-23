@@ -3,10 +3,10 @@ const PythonFiles = require('../models/pythonFiles.model.js'),
   Python = require('../providers/scripts/python.service.js'),
   Utils = require('../helpers/utils.helper.js');
 
-  const ITERATIONS_DEFAULT = 100,
+  const ITERATIONS_DEFAULT = 1,
   DAEMON_INTERVAL_TIME = 30000,
-  MDL_VERSION = '12345';
-  // MDL_VERSION = '1teration';
+  // TODO: HILAR FINO - version value for PythonFiles only object, somewhere as a constant?
+  MDL_VERSION = '2.0';
 
 const startModelDaemon = function () {
   setTimeout(_checkPendingCorpuses, DAEMON_INTERVAL_TIME);
@@ -37,6 +37,8 @@ const _followCorpusTraining = function(corpusArray, corpusIndex, totalCorpuses, 
     // TODO: usar el status no binario para marcar si funcionó o falló
     if (!err) {
       CorpusController.markAsUsed(corpus.id, function() {});
+    } else {
+      console.log('FAILED _trainModel ' + err);
     }
     if (corpusIndex < totalCorpuses - 1) {
       corpusIndex = corpusIndex + 1;
@@ -60,7 +62,6 @@ const _trainModel = function(corpusFileName, callback) {
       if (err) {
         callback(err);
       } else {
-        // TODO: HILAR FINO - version value for PythonFiles only object, somewhere as a constant?
         PythonFiles.update({ version: MDL_VERSION }, { $set: { modelDescriptorList: updatedModelDescriptorList } }, function (err) {
           if (err) {
             console.log('FAILED to save _trainModel ' + corpusFileName);
@@ -75,7 +76,6 @@ const _trainModel = function(corpusFileName, callback) {
 }
 
 const getModelDescriptorListFromDB = function(callback) {
-  // TODO: HILAR FINO - version value for PythonFiles only object, somewhere as a constant?
   PythonFiles.findOne({ version: MDL_VERSION }, function (err, pythonFilesData) {
     if (err) {
       console.log('FAILED getModelDescriptorListFromDB ' + MDL_VERSION);

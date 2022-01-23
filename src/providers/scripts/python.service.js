@@ -86,6 +86,7 @@ const trainModel = function(modelId, fileName, modelDescriptorList, iterations, 
       console.log('FAILED Python.trainModel: ' + err);
       callback(err);
     } else {
+      console.log('SUCCESS Python.trainModel: ' + textArrayAnswer);
       LOG_EXECUTION_ARGUMENTS && textArrayAnswer.forEach(element => {
         console.log(element);
       });
