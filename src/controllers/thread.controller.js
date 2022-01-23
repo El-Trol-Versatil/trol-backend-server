@@ -4,15 +4,16 @@ const botController = require('./bot.controller.js'),
 
 // It accepts a topic description and an array of members.
 // This is the thread starter, which will recursively feed the conversation.
-const createConversation = function (netId, topic, members) {
-  console.log('RUNNING createConversation ' + topic);
-  const dataArray = [topic, members, 0, Math.pow(members.length, 2), null, [], []];
+const createConversation = function (netId, topicContent, topicId, members) {
+  console.log('RUNNING createConversation ' + topicContent);
+  const dataArray = [topicContent, topicId, members, 0, Math.pow(members.length, 2), null, [], []];
   _followConversation(dataArray, function (conversation) {
-    console.log('FINISHED createConversation ' + topic);
+    console.log('FINISHED createConversation ' + topicContent);
     let createdConversation = new Conversation({
       trollnetId: netId,
       creationDate: new Date(),
-      topic: topic,
+      topic: topicContent,
+      topicId: topicId,
       conversation: conversation,
     });
     createdConversation.save(function (err) {
@@ -26,37 +27,40 @@ const createConversation = function (netId, topic, members) {
 // Accepts an array of data needed for every conversation step.
 // Recursive method that will call itself for each following answer in the thread.
 const _followConversation = function (
-      [topic, members, answerIndex, maxAnswers, lastTalker, talkersIndexes, messageArray],
+      [topicContent, topicId, members, answerIndex, maxAnswers, lastTalker, talkersIndexes, messageArray],
       callback) {
-  let memberToReply, messageToReply;
+  let memberToReply, messageToReply, messageToReplyContent, messageToReplyId;
   // 1. random talker from list
   lastTalker = _getRandomDifferentMember(members, lastTalker);
   // 2. answer or reply?
-  if (_shouldReplyOrJustAnswer(answerIndex, maxAnswers)) {
-
+  if (_shouldReplyOrJustAnswer(answerIndex, maxAnswers)) { 
     memberToReply = _getRandomDifferentMember(talkersIndexes, lastTalker);
-    messageToReply = _getLastMessageFrom(memberToReply, messageArray) || topic;
+    messageToReply = _getLastMessageFrom(memberToReply, messageArray);
+    messageToReplyContent = messageToReply && messageToReply.content || topicContent;
+    messageToReplyId = messageToReply && messageToReply.id || topicId;
   } else {
     memberToReply = null;
-    messageToReply = topic;
+    messageToReplyContent = topicContent;
+    messageToReplyId = topicId;
   }
   // 3. Generate answer
   console.log('_followConversation ' + lastTalker + ' is thinking an answer...');
-  botController.answerThread(lastTalker, messageToReply, function (err, answer) {
+  botController.answerThread(messageToReplyId, messageToReplyContent, lastTalker, function (err, answer) {
     if (err) {
       console.log('FAILED _followConversation bot could not answer :( ' + answerIndex);
     } else {
       messageArray.push({
         from: lastTalker,
         to: memberToReply,
-        content: answer,
+        content: answer.content,
+        id: answer.id,
       });
-      console.log('_followConversation ' + lastTalker + ' said to ' + (memberToReply || 'everyone') + ': ' + answer);
+      console.log('_followConversation ' + lastTalker + ' said to ' + (memberToReply || 'everyone') + ': ' + answer.content);
       _saveLastTalker(talkersIndexes, lastTalker);
     }
     if (answerIndex < maxAnswers - 1) {
       answerIndex = answerIndex + 1;
-      _followConversation([topic, members, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray], callback);
+      _followConversation([topicContent, topicId, members, answerIndex++, maxAnswers, lastTalker, talkersIndexes, messageArray], callback);
     } else {
       callback(messageArray);
     };
@@ -89,8 +93,7 @@ const _getLastMessageFrom = function (member, conversation) {
     }
   });
   const randomIndex = Math.trunc(Math.random() * possibleMessages.length);
-  lastMessage = possibleMessages[randomIndex].content;
-  return lastMessage;
+  return possibleMessages[randomIndex];
 }
 
 // Save last talker as last in queue order.

@@ -20,6 +20,11 @@ router
     ROUTER_CONFIG.EP_TROLLNET.BY_ID,
     trollnetCtrl.deleteTrollnet)
 
+  // routing for '/status'
+  .post(
+    ROUTER_CONFIG.EP_TROLLNET.STATUS,
+    trollnetCtrl.getUntrainedTrollnetsStatus)
+
   // routing for '/rename/:id'
   .put(
     ROUTER_CONFIG.EP_TROLLNET.RENAME,

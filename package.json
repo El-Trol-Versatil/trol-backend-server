@@ -1,7 +1,7 @@
 {
   "name": "etv-backend",
   "version": "0.0.1",
-  "description": "Standalone backend for Edomus",
+  "description": "Standalone backend for ETV",
   "main": "server.js",
   "dependencies": {
     "bcryptjs": "^2.4.3",
